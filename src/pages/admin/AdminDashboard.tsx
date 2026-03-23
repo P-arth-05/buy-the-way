@@ -14,8 +14,8 @@ const AdminDashboard = () => (
       <div className="bg-card rounded-2xl shadow-soft p-6">
         <h2 className="font-semibold mb-3">System Status</h2>
         <div className="space-y-3 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">Database</span><span className="text-emerald-600 font-medium">Healthy</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">API Response</span><span className="text-emerald-600 font-medium">42ms</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Database</span><span className="font-medium text-foreground">Healthy</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">API Response</span><span className="font-medium text-foreground">42ms</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Uptime</span><span className="font-medium">99.98%</span></div>
         </div>
       </div>
