@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,8 @@ const vendorLinks = [
 const adminLinks = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
   { label: "Approvals", icon: Package, to: "/admin/approvals" },
+  { label: "Vendors", icon: Store, to: "/admin/vendors" },
+  { label: "Manage Categories", icon: Tag, to: "/admin/categories" },
   { label: "Reports", icon: BarChart3, to: "/admin/reports" },
 ];
 

@@ -18,6 +18,8 @@ import InventoryPage from "@/pages/vendor/InventoryPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ApprovalsPage from "@/pages/admin/ApprovalsPage";
 import ReportsPage from "@/pages/admin/ReportsPage";
+import CategoriesPage from "@/pages/admin/CategoriesPage";
+import VendorsPage from "@/pages/admin/VendorsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +54,8 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/approvals" element={<ApprovalsPage />} />
               <Route path="/admin/reports" element={<ReportsPage />} />
+              <Route path="/admin/categories" element={<CategoriesPage />} />
+              <Route path="/admin/vendors" element={<VendorsPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
