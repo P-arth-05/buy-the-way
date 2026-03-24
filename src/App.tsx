@@ -28,8 +28,7 @@ import FAQPage from "@/pages/customer/FAQPage";
 import ReturnsPage from "@/pages/customer/ReturnsPage";
 import TermsPage from "@/pages/customer/TermsPage";
 import PrivacyPage from "@/pages/customer/PrivacyPage";
-import Landing from "@/pages/LandingPage/Landing"; 
-import Landing from "@/pages/Landing/Landing"; 
+import Landing from "@/pages/temp/Landing"; 
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 
