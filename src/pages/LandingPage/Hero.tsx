@@ -74,7 +74,7 @@ export default function Hero() {
                     animate={{ x: ["0%", "-50%"] }}
                     transition={{
                     repeat: Infinity,
-                    duration: 20,
+                    duration: 30,
                     ease: "linear",
                     }}
                 >
