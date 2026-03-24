@@ -47,7 +47,7 @@ export default function Hero() {
 
             {/* CTA + AVATARS */}
             <div className="flex items-center gap-4 mt-10">
-              <Button className="rounded-full px-10 py-8 text-xl">
+              <Button className="rounded-full px-10 py-8 text-xl" onClick={()=>navigate('/register')}>
                 Register Now
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
