@@ -2,6 +2,14 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface DashboardLayoutProps {
   role: "vendor" | "admin";
@@ -64,9 +72,47 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
           <h1 className="text-lg font-semibold">{links.find(l => l.to === location.pathname)?.label || title}</h1>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          {role === "vendor" ? (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Vendor Profile</DialogTitle>
+                  <DialogDescription>Profile details for the current vendor account.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Name</span>
+                    <span className="font-medium">Current Vendor</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium">vendor@harmony.com</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Phone</span>
+                    <span className="font-medium">+91 98765 43210</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Store</span>
+                    <span className="font-medium">Harmony Vendor Store</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Member Since</span>
+                    <span className="font-medium">Jan 2024</span>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          )}
         </header>
         <main className="flex-1 p-8">
           <Outlet />

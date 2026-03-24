@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
+import { ProductWorkflowProvider } from "@/contexts/ProductWorkflowContext";
 import CustomerLayout from "@/components/layout/CustomerLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomePage from "@/pages/customer/HomePage";
@@ -32,10 +33,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+        <ProductWorkflowProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
             {/* Customer routes */}
             <Route element={<CustomerLayout />}>
               <Route path="/" element={<HomePage />} />
@@ -67,8 +69,9 @@ const App = () => (
             </Route>
 
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
+        </ProductWorkflowProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
