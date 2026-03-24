@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import ScrollBg from "@/components/Scrollbg"
-import Navbar from "./Landing/Navbar"
-import Footer from "./Landing/Footer"
+import ScrollBg from "@/components/ScrollBg"
+import Navbar from "./LandingPage/Navbar"
+import Footer from "./LandingPage/Footer"
 
 export default function Login() {
   const navigate = useNavigate()
