@@ -19,7 +19,13 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ApprovalsPage from "@/pages/admin/ApprovalsPage";
 import ReportsPage from "@/pages/admin/ReportsPage";
 import NotFound from "@/pages/NotFound";
-
+// Add this near your other customer page imports
+import OrderHistoryPage from "@/pages/customer/OrderHistoryPage";
+import AboutPage from "@/pages/customer/AboutPage";
+import FAQPage from "@/pages/customer/FAQPage";
+import ReturnsPage from "@/pages/customer/ReturnsPage";
+import TermsPage from "@/pages/customer/TermsPage";
+import PrivacyPage from "@/pages/customer/PrivacyPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -37,6 +43,12 @@ const App = () => (
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-tracking" element={<OrderTrackingPage />} />
+              <Route path="/order-history" element={<OrderHistoryPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/returns" element={<ReturnsPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
             </Route>
 
             {/* Vendor routes */}

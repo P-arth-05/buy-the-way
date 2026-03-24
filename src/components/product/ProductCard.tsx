@@ -1,37 +1,51 @@
 import { Product } from "@/data/mockData";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Star } from "lucide-react"; // Imported Star
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
-const ProductCard = ({ product }: { product: Product }) => {
+interface ProductCardProps { product: Product; }
+
+export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart(product);
+    toast.success(`${product.name} added to cart!`);
+  };
 
   return (
-    <div className="bg-card rounded-2xl shadow-soft overflow-hidden group hover:shadow-soft-lg transition-all duration-300">
-      <Link to={`/product/${product.id}`}>
-        <div className="aspect-square overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+    <Link to={`/product/${product.id}`}>
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col group">
+        <div className="relative aspect-square overflow-hidden bg-muted">
+          <img src={product.image} alt={product.name} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
+          <Badge className="absolute top-2 right-2 bg-background/80 text-foreground backdrop-blur-sm">{product.category}</Badge>
         </div>
-      </Link>
-      <div className="p-4 space-y-3">
-        <Link to={`/product/${product.id}`}>
-          <h3 className="font-medium text-sm leading-tight hover:text-accent transition-colors">{product.name}</h3>
-        </Link>
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">${product.price.toFixed(2)}</span>
-          <Button variant="soft" size="sm" onClick={() => addToCart(product)}>
-            <ShoppingCart className="h-3.5 w-3.5" />
-            Add
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
+        
+        <CardContent className="p-4 flex-1">
+          <div className="flex justify-between items-start gap-2 mb-1">
+            <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
+            <span className="font-bold whitespace-nowrap">INR{product.price.toFixed(2)}</span>
+          </div>
+          {/* NEW: Ratings display */}
+          <div className="flex items-center gap-1 mb-2 text-sm text-muted-foreground">
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+            <span className="font-medium text-foreground">{product.rating}</span>
+            <span>({product.reviews})</span>
+          </div>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
+          <p className="text-xs text-muted-foreground">Sold by: <span className="font-medium">{product.vendor}</span></p>
+        </CardContent>
 
-export default ProductCard;
+        <CardFooter className="p-4 pt-0">
+          <Button onClick={handleAddToCart} className="w-full gap-2" disabled={product.stock === 0} variant={product.stock === 0 ? "secondary" : "default"}>
+            <ShoppingCart className="h-4 w-4" /> {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+          </Button>
+        </CardFooter>
+      </Card>
+    </Link>
+  );
+}
