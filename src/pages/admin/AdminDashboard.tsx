@@ -1,12 +1,13 @@
 import StatCard from "@/components/shared/StatCard";
-import { Users, Package, ShoppingBag, AlertCircle } from "lucide-react";
+import { Users, Package, ShoppingBag, AlertCircle, Store } from "lucide-react";
 
 const AdminDashboard = () => (
   <div className="space-y-8">
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <StatCard label="Total Users" value={1284} icon={<Users className="h-4 w-4 text-foreground" />} trend="+48 this week" />
+      <StatCard label="Total Customers" value={1284} icon={<Users className="h-4 w-4 text-foreground" />} trend="+48 this week" />
       <StatCard label="Total Products" value={342} icon={<Package className="h-4 w-4 text-foreground" />} trend="12 pending" />
       <StatCard label="Total Orders" value={2841} icon={<ShoppingBag className="h-4 w-4 text-foreground" />} trend="+156 this week" />
+      <StatCard label="Total Vendors" value={47} icon={<Store className="h-4 w-4 text-foreground" />} trend="+3 this month" />
       <StatCard label="Pending Approvals" value={5} icon={<AlertCircle className="h-4 w-4 text-foreground" />} trend="Action needed" />
     </div>
 
