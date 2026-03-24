@@ -28,6 +28,10 @@ import FAQPage from "@/pages/customer/FAQPage";
 import ReturnsPage from "@/pages/customer/ReturnsPage";
 import TermsPage from "@/pages/customer/TermsPage";
 import PrivacyPage from "@/pages/customer/PrivacyPage";
+import Landing from "@/pages/Landing/landing"; 
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -39,8 +43,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Customer routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route element={<CustomerLayout />}>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<HomePage />} />
               <Route path="/product/:id" element={<ProductDetailsPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
