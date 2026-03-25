@@ -71,29 +71,29 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" placeholder="John Doe" {...register("fullName")} />
+                  <Input id="fullName" placeholder="Parth Agarwal" {...register("fullName")} />
                   {errors.fullName && <p className="text-sm text-destructive">{errors.fullName.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" {...register("email")} />
+                  <Input id="email" type="email" placeholder="parth@example.com" {...register("email")} />
                   {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="address">Street Address</Label>
-                <Input id="address" placeholder="123 Main St" {...register("address")} />
+                <Input id="address" placeholder="A-12, Ashok Vihar" {...register("address")} />
                 {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
-                  <Input id="city" placeholder="New York" {...register("city")} />
+                  <Input id="city" placeholder="Delhi" {...register("city")} />
                   {errors.city && <p className="text-sm text-destructive">{errors.city.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zipCode">Zip Code</Label>
-                  <Input id="zipCode" placeholder="10001" {...register("zipCode")} />
+                  <Input id="zipCode" placeholder="110052" {...register("zipCode")} />
                   {errors.zipCode && <p className="text-sm text-destructive">{errors.zipCode.message}</p>}
                 </div>
               </div>
@@ -140,14 +140,14 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex justify-between text-sm">
                     <span className="truncate pr-4">{item.quantity}x {item.product.name}</span>
-                    <span>INR{(item.product.price * item.quantity).toFixed(2)}</span>
+                    <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>INR{total.toFixed(2)}</span>
+                  <span>₹{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
@@ -156,10 +156,10 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t pt-4 flex justify-between items-center font-bold text-lg">
                 <span>Total</span>
-                <span>INR{total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
               <Button type="submit" className="w-full mt-6" size="lg" disabled={isProcessing}>
-                {isProcessing ? "Processing..." : `Pay $${total.toFixed(2)}`}
+                {isProcessing ? "Processing..." : `Pay ₹${total.toFixed(2)}`}
               </Button>
             </CardContent>
           </Card>

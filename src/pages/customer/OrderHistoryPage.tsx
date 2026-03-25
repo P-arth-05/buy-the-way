@@ -21,14 +21,14 @@ export default function OrderHistoryPage() {
                 <p className="text-sm text-muted-foreground">Placed on {order.date}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold">INR{order.total.toFixed(2)}</p>
+                <p className="font-bold">₹{order.total.toFixed(2)}</p>
                 <p className="text-sm text-green-600 font-medium">{order.status}</p>
               </div>
             </CardHeader>
             <CardContent className="pt-4 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">{order.items} item(s) in this order.</p>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/order-tracking" state={{ orderId: order.id }} className="gap-2">
+                <Link to="/order-tracking" state={{ orderId: order.id, status: order.status }} className="gap-2">
                   View Details <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>

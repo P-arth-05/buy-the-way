@@ -56,7 +56,7 @@ export default function ProductDetailsPage() {
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
             <p className="text-3xl font-bold text-primary mb-6">
-              INR{product.price.toFixed(2)}
+              ₹{product.price.toFixed(2)}
             </p>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               {product.description}

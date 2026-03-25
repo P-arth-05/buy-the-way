@@ -28,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <CardContent className="p-4 flex-1">
           <div className="flex justify-between items-start gap-2 mb-1">
             <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
-            <span className="font-bold whitespace-nowrap">INR{product.price.toFixed(2)}</span>
+            <span className="font-bold whitespace-nowrap">₹{product.price.toFixed(2)}</span>
           </div>
           {/* NEW: Ratings display */}
           <div className="flex items-center gap-1 mb-2 text-sm text-muted-foreground">

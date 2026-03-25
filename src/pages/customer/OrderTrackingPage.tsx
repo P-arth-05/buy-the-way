@@ -13,19 +13,31 @@ const STATUS_STEPS = [
   { id: "delivered", label: "Delivered", icon: CheckCircle },
 ];
 
+const STATUS_INDEX_MAP: Record<string, number> = {
+  "Processing": 0,
+  "Shipped": 1,
+  "In Transit": 1,
+  "Out for Delivery": 2,
+  "Delivered": 3,
+};
+
 export default function OrderTrackingPage() {
   const location = useLocation();
   const [searchId, setSearchId] = useState("");
   const [trackedOrder, setTrackedOrder] = useState<string | null>(null);
   
   
-  const currentStepIndex = 1; 
+  const [orderStatus, setOrderStatus] = useState<string>("Processing");
+  const currentStepIndex = STATUS_INDEX_MAP[orderStatus] ?? 0;
   const isDelivered = currentStepIndex === STATUS_STEPS.length - 1;
 
   useEffect(() => {
-    if (location.state && location.state.orderId) {
+    if (location.state?.orderId) {
       setSearchId(location.state.orderId);
       setTrackedOrder(location.state.orderId);
+    }
+    if (location.state?.status) {
+      setOrderStatus(location.state.status);
     }
   }, [location]);
 

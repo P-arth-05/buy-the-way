@@ -60,7 +60,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-base font-semibold">Max Price</Label>
-                  <span className="text-sm font-medium">INR{priceRange[0]}</span>
+                  <span className="text-sm font-medium">₹{priceRange[0]}</span>
                 </div>
                 <Slider defaultValue={[5000]} max={5000} step={100} onValueChange={setPriceRange} />
               </div>
