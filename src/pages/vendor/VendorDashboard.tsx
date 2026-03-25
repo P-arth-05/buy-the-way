@@ -1,5 +1,5 @@
 import StatCard from "@/components/shared/StatCard";
-import { Package, ShoppingBag, DollarSign, TrendingUp } from "lucide-react";
+import { Package, ShoppingBag, IndianRupee, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const chartData = [
@@ -16,7 +16,7 @@ const VendorDashboard = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
       <StatCard label="Total Products" value={8} icon={<Package className="h-4 w-4 text-foreground" />} trend="+2 this month" />
       <StatCard label="Total Orders" value={145} icon={<ShoppingBag className="h-4 w-4 text-foreground" />} trend="+12 this week" />
-      <StatCard label="Revenue" value="$8,420" icon={<DollarSign className="h-4 w-4 text-foreground" />} trend="+18% vs last month" />
+      <StatCard label="Revenue" value="₹8,420" icon={<IndianRupee className="h-4 w-4 text-foreground" />} trend="+18% vs last month" />
       <StatCard label="Growth" value="24%" icon={<TrendingUp className="h-4 w-4 text-foreground" />} trend="Trending up" />
     </div>
 

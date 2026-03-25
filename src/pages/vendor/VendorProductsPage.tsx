@@ -86,7 +86,7 @@ const VendorProductsPage = () => {
                     )}
                   </td>
                   <td className="px-6 py-4">{p.stock}</td>
-                  <td className="px-6 py-4">${p.price.toFixed(2)}</td>
+                  <td className="px-6 py-4">₹{p.price.toFixed(2)}</td>
                   <td className="px-6 py-4">
                     <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium capitalize", statusStyles[p.categoryStatus || "approved"])}>
                       {p.categoryStatus || "approved"}

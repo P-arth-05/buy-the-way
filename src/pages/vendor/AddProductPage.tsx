@@ -64,7 +64,7 @@ const AddProductPage = () => {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <Label>Price ($)</Label>
+            <Label>Price (₹)</Label>
             <Input required type="number" value={price} onChange={(e) => setPrice(e.target.value)} step="0.01" placeholder="29.99" className="mt-1.5" />
           </div>
           <div>
