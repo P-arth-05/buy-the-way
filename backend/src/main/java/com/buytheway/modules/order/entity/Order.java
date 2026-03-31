@@ -16,23 +16,19 @@ public class Order {
     private int quantity;
     private double totalPrice;
 
-    // ✅ ENUM instead of String
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    private LocalDateTime createdAt;
 
     public Order() {
         this.status = OrderStatus.CREATED;
     }
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
-    // getters & setters
 
     public Long getId() { return id; }
 

@@ -6,10 +6,6 @@ public class OrderDTO {
     private Long userId;
     private int quantity;
 
-    
-
-    // getters & setters
-
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
 
