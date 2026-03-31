@@ -31,7 +31,8 @@ import TermsPage from "@/pages/customer/TermsPage";
 import PrivacyPage from "@/pages/customer/PrivacyPage";
 import Landing from "@/pages/LandingPage/Landing"; 
 import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import Register from "@/pages/CustomerRegister";
+import VendorRegister from "@/pages/VendorRegister";
 
 const queryClient = new QueryClient();
 
@@ -44,10 +45,13 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-            {/* Customer routes */}
+            {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/vendor-register" element={<VendorRegister />} />
+
+            {/* Customer routes */}
             <Route element={<CustomerLayout />}>
               <Route path="/shop" element={<HomePage />} />
               <Route path="/product/:id" element={<ProductDetailsPage />} />

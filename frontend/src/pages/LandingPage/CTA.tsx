@@ -25,20 +25,20 @@ export default function CTA() {
           <div className="relative z-10 max-w-3xl mx-auto">
             
             <h2 className="text-3xl md:text-5xl font-light leading-tight">
-              We don't sell everything, just the things worth having
+              Stop Wrestling with Complex Setup and Start Selling Your Products Today
             </h2>
 
             <p className="text-neutral-400 mt-4 text-sm md:text-base">
-              Discover curated products, verified vendors, and a seamless experience — all in one place.
+              Claim your dedicated vendor space, upload your catalog in minutes, and let our platform handle the heavy lifting.
             </p>
 
             {/* CTA Button */}
             <div className="mt-8 flex justify-center">
               <Button
-                onClick={() => navigate("/shop")}
+                onClick={() => navigate("/vendor-register")}
                 className="rounded-full px-10 py-6 text-lg font-semibold bg-teal-500 text-black hover:bg-teal-400 transition flex items-center gap-2 shadow-lg shadow-teal-500/20"
               >
-                Explore the Shop
+                START SELLING
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </div>

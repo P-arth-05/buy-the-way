@@ -2,17 +2,18 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import ScrollBg from "@/components/ScrollBg"
+import ScrollBg from "@/components/ScrollBgVendor"
 import Navbar from "./LandingPage/Navbar"
 import Footer from "./LandingPage/Footer"
 import { supabase } from "@/lib/supabase"
 import { useState } from "react"   
 
-export default function Register() {
+export default function VendorRegister() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const role = "vendor";
 
 
 
@@ -28,6 +29,7 @@ export default function Register() {
         setMessage("Check your email for verification");
     }
   };
+  {message && <p className="text-green-600 text-center">{message}</p>}
 
   return (
     <section className="min-h-screen bg-neutral-100 ">
