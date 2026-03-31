@@ -2,9 +2,10 @@ package com.buytheway.modules.order.service;
 
 import com.buytheway.modules.order.dto.OrderDTO;
 import com.buytheway.modules.order.entity.Order;
+import com.buytheway.modules.order.entity.OrderStatus;
 import com.buytheway.modules.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
-import com.buytheway.modules.order.entity.OrderStatus;
+
 import java.util.List;
 
 @Service
@@ -31,16 +32,16 @@ public class OrderService {
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
-        if (dto.getTotalPrice() <= 0) {
-            throw new RuntimeException("Total price must be greater than 0");
-        }
-
         // ✅ Mapping DTO → Entity
         Order order = new Order();
         order.setProductId(dto.getProductId());
         order.setUserId(dto.getUserId());
         order.setQuantity(dto.getQuantity());
-        order.setTotalPrice(dto.getTotalPrice());
+
+        // ✅ Backend calculates total price (IMPORTANT FIX)
+        double pricePerUnit = 500; // temporary dummy price
+        double total = pricePerUnit * dto.getQuantity();
+        order.setTotalPrice(total);
 
         return orderRepository.save(order);
     }
@@ -56,17 +57,17 @@ public class OrderService {
 
     public Order updateStatus(Long id, String status) {
 
-    OrderStatus newStatus;
+        OrderStatus newStatus;
 
-    try {
-        newStatus = OrderStatus.valueOf(status.toUpperCase());
-    } catch (Exception e) {
-        throw new RuntimeException("Invalid status value. Allowed: CREATED, SHIPPED, DELIVERED, CANCELLED");
+        try {
+            newStatus = OrderStatus.valueOf(status.toUpperCase());
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid status value. Allowed: CREATED, SHIPPED, DELIVERED, CANCELLED");
+        }
+
+        Order order = getOrderById(id);
+        order.setStatus(newStatus);
+
+        return orderRepository.save(order);
     }
-
-    Order order = getOrderById(id);
-    order.setStatus(newStatus);
-
-    return orderRepository.save(order);
-}
 }
