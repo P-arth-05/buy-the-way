@@ -5,9 +5,27 @@ import { Input } from "@/components/ui/input"
 import ScrollBg from "@/components/ScrollBg"
 import Navbar from "./LandingPage/Navbar"
 import Footer from "./LandingPage/Footer"
+import { supabase } from "@/lib/supabase"
+import { useState } from "react"
 
 export default function Login() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
+
+    if (error) {
+        console.error(error.message);
+    } else {
+        console.log("Logged in:", data);
+    }
+  };
+
 
   return (
     <section>
@@ -32,17 +50,17 @@ export default function Login() {
 
             {/* FORM */}
             <div className="mt-6 space-y-4">
-            <Input type="email" placeholder="Email" />
-            <Input type="password" placeholder="Password" />
+            <Input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+            <Input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
-            <Button className="w-full rounded-full py-6 text-lg">
+            <Button onClick={handleLogin} className="w-full rounded-full py-6 text-lg">
                 Login
             </Button>
             </div>
 
             {/* FOOTER */}
             <p className="text-sm text-center mt-6 text-neutral-500">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span
                 onClick={() => navigate("/register")}
                 className="text-black font-medium cursor-pointer"

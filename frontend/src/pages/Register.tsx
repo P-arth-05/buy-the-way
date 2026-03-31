@@ -4,10 +4,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ScrollBg from "@/components/ScrollBg"
 import Navbar from "./LandingPage/Navbar"
-import Footer from "./LandingPage/Footer"   
+import Footer from "./LandingPage/Footer"
+import { supabase } from "@/lib/supabase"
+import { useState } from "react"   
 
 export default function Register() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+
+
+  const handleRegister = async () => {
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+    });
+
+    if (error) {
+        setMessage(error.message);
+    } else {
+        setMessage("Check your email for verification");
+    }
+  };
 
   return (
     <section className="min-h-screen bg-neutral-100 ">
@@ -31,11 +51,10 @@ export default function Register() {
 
             {/* FORM */}
             <div className="mt-6 space-y-4">
-            <Input type="text" placeholder="Full Name" />
-            <Input type="email" placeholder="Email" />
-            <Input type="password" placeholder="Password" />
+            <Input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+            <Input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
-            <Button className="w-full rounded-full py-6 text-lg">
+            <Button onClick={handleRegister} className="w-full rounded-full py-6 text-lg">
                 Register
             </Button>
             </div>
