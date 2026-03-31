@@ -45,7 +45,7 @@ public class ProductDTO {
 
     @DecimalMin(value = "0.0", message = "Rating must be 0 or higher")
     @DecimalMax(value = "5.0", message = "Rating must be 5 or lower")
-    private Double rating;
+    private BigDecimal rating;
 
     @Min(value = 0, message = "Reviews count cannot be negative")
     private Integer reviews;

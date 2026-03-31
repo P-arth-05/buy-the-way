@@ -38,7 +38,7 @@ public class Product {
     private String vendor;
 
     @Column(precision = 2, scale = 1)
-    private Double rating;
+    private BigDecimal rating;
 
     @Column
     private Integer reviews;
@@ -57,7 +57,7 @@ public class Product {
             this.status = ProductStatus.PENDING;
         }
         if (this.rating == null) {
-            this.rating = 0.0;
+            this.rating = BigDecimal.ZERO;
         }
         if (this.reviews == null) {
             this.reviews = 0;
@@ -145,11 +145,11 @@ public class Product {
         this.vendor = vendor;
     }
 
-    public Double getRating() {
+    public BigDecimal getRating() {
         return rating;
     }
 
-    public void setRating(Double rating) {
+    public void setRating(BigDecimal rating) {
         this.rating = rating;
     }
 

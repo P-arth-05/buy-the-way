@@ -154,7 +154,7 @@ public class ProductService {
         if (dto.getVendor() == null || dto.getVendor().trim().isEmpty()) {
             throw new RuntimeException("Vendor is required");
         }
-        if (dto.getRating() != null && (dto.getRating() < 0 || dto.getRating() > 5)) {
+        if (dto.getRating() != null && (dto.getRating().compareTo(java.math.BigDecimal.ZERO) < 0 || dto.getRating().compareTo(new java.math.BigDecimal("5.0")) > 0)) {
             throw new RuntimeException("Rating must be between 0 and 5");
         }
         if (dto.getReviews() != null && dto.getReviews() < 0) {
