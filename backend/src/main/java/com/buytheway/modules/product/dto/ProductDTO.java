@@ -1,10 +1,18 @@
 package com.buytheway.modules.product.dto;
 
+import java.math.BigDecimal;
+
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -45,7 +53,7 @@ public class ProductDTO {
 
     @DecimalMin(value = "0.0", message = "Rating must be 0 or higher")
     @DecimalMax(value = "5.0", message = "Rating must be 5 or lower")
-    private Double rating;
+    private BigDecimal rating;
 
     @Min(value = 0, message = "Reviews count cannot be negative")
     private Integer reviews;

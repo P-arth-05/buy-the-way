@@ -1,14 +1,16 @@
 package com.buytheway.modules.product.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.buytheway.modules.product.dto.ProductDTO;
 import com.buytheway.modules.product.entity.Product;
 import com.buytheway.modules.product.entity.ProductStatus;
 import com.buytheway.modules.product.repository.ProductRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -154,7 +156,9 @@ public class ProductService {
         if (dto.getVendor() == null || dto.getVendor().trim().isEmpty()) {
             throw new RuntimeException("Vendor is required");
         }
-        if (dto.getRating() != null && (dto.getRating() < 0 || dto.getRating() > 5)) {
+        if (dto.getRating() != null &&
+                (dto.getRating().compareTo(BigDecimal.ZERO) < 0 ||
+                 dto.getRating().compareTo(BigDecimal.valueOf(5)) > 0)) {
             throw new RuntimeException("Rating must be between 0 and 5");
         }
         if (dto.getReviews() != null && dto.getReviews() < 0) {
