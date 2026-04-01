@@ -19,6 +19,8 @@ export default function VendorRegister() {
 
 
   const handleRegister = async () => {
+    setMessage("");
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -29,19 +31,36 @@ export default function VendorRegister() {
         return;
     }
 
-    const userId = data.user.id;
+    const userId = data.user?.id;
 
-    // insert role into profiles
-    await supabase.from("profiles").insert([
+    if (!userId) {
+        alert("User creation failed");
+        return;
+    }
+
+    const { error: profileError } = await supabase
+        .from("profiles")
+        .insert([
         {
-        id: userId,
-        role: role,
-        name: name,
-        is_verified: false, // New field to track verification status
+            id: userId,
+            role: role,
+            name: name,
+            is_verified: false, // New vendors are unverified by default
         },
-    ]);
+        ]);
 
+    if (profileError) {
+        console.error(profileError.message);
+        return;
+    }
+
+    setMessage("Account created successfully !!!");
+
+    setTimeout(() => {
+        navigate("/login");
+    }, 1500);
   };
+
 
   return (
     <section className="min-h-screen bg-neutral-100 ">
@@ -72,6 +91,8 @@ export default function VendorRegister() {
             <Button onClick={handleRegister} className="w-full rounded-full py-6 text-lg">
                 Register
             </Button>
+            {message && (<p className="text-green-600 text-center mt-2">{message}</p>)}
+
             </div>
 
             {/* FOOTER */}
