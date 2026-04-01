@@ -40,7 +40,7 @@ export default function CartPage() {
                 <div className="flex-1 text-center sm:text-left">
                   <h3 className="font-semibold text-lg">{item.product.name}</h3>
                   <p className="text-sm text-muted-foreground">{item.product.category}</p>
-                  <p className="font-bold mt-2">${item.product.price.toFixed(2)}</p>
+                  <p className="font-bold mt-2">₹{item.product.price.toFixed(2)}</p>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -69,7 +69,7 @@ export default function CartPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₹{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
@@ -83,7 +83,7 @@ export default function CartPage() {
               <Separator className="my-4" />
               <div className="flex justify-between items-center mb-6">
                 <span className="font-bold text-lg">Estimated Total</span>
-                <span className="font-bold text-2xl">${total.toFixed(2)}</span>
+                <span className="font-bold text-2xl">₹{total.toFixed(2)}</span>
               </div>
               <Button size="lg" className="w-full gap-2" onClick={() => navigate("/checkout")}>
                 Proceed to Checkout <ArrowRight className="h-4 w-4" />
