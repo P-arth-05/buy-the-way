@@ -19,29 +19,25 @@ public class OrderService {
 
     public Order createOrder(OrderDTO dto) {
 
-        // ✅ Validation
-        if (dto.getProductId() == null) {
+        if (dto.getProductId() == null)
             throw new RuntimeException("Product ID is required");
-        }
 
-        if (dto.getUserId() == null) {
+        if (dto.getUserId() == null)
             throw new RuntimeException("User ID is required");
-        }
 
-        if (dto.getQuantity() <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
-        }
+        if (dto.getQuantity() <= 0)
+            throw new RuntimeException("Quantity must be > 0");
 
-        // ✅ Mapping DTO → Entity
+        // ⚠️ TEMPORARY LOGIC (until Product module is ready)
+        double dummyPrice = 500;  // replace later
+
+        double totalPrice = dummyPrice * dto.getQuantity();
+
         Order order = new Order();
         order.setProductId(dto.getProductId());
         order.setUserId(dto.getUserId());
         order.setQuantity(dto.getQuantity());
-
-        // ✅ Backend calculates total price (IMPORTANT FIX)
-        double pricePerUnit = 500; // temporary dummy price
-        double total = pricePerUnit * dto.getQuantity();
-        order.setTotalPrice(total);
+        order.setTotalPrice(totalPrice);
 
         return orderRepository.save(order);
     }
@@ -52,7 +48,15 @@ public class OrderService {
 
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order with ID " + id + " not found"));
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    public List<Order> getOrdersByUser(Long userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status);
     }
 
     public Order updateStatus(Long id, String status) {
@@ -62,12 +66,24 @@ public class OrderService {
         try {
             newStatus = OrderStatus.valueOf(status.toUpperCase());
         } catch (Exception e) {
-            throw new RuntimeException("Invalid status value. Allowed: CREATED, SHIPPED, DELIVERED, CANCELLED");
+            throw new RuntimeException("Invalid status");
         }
 
         Order order = getOrderById(id);
         order.setStatus(newStatus);
 
+        return orderRepository.save(order);
+    }
+
+    public Order cancelOrder(Long id) {
+
+        Order order = getOrderById(id);
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new RuntimeException("Cannot cancel delivered order");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
         return orderRepository.save(order);
     }
 }
