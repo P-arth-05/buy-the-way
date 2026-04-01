@@ -13,6 +13,7 @@ export default function VendorRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [name, setName] = useState("");
   const role = "vendor";
 
 
@@ -24,12 +25,23 @@ export default function VendorRegister() {
     });
 
     if (error) {
-        setMessage(error.message);
-    } else {
-        setMessage("Check your email for verification");
+        alert(error.message);
+        return;
     }
+
+    const userId = data.user.id;
+
+    // insert role into profiles
+    await supabase.from("profiles").insert([
+        {
+        id: userId,
+        role: role,
+        name: name,
+        is_verified: false, // New field to track verification status
+        },
+    ]);
+
   };
-  {message && <p className="text-green-600 text-center">{message}</p>}
 
   return (
     <section className="min-h-screen bg-neutral-100 ">
@@ -53,6 +65,7 @@ export default function VendorRegister() {
 
             {/* FORM */}
             <div className="mt-6 space-y-4">
+            <Input type="text" placeholder="Name" onChange={(e) => setName(e.target.value)} />
             <Input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             <Input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
