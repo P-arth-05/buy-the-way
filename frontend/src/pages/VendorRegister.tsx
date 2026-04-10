@@ -13,23 +13,54 @@ export default function VendorRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [name, setName] = useState("");
   const role = "vendor";
 
 
 
   const handleRegister = async () => {
+    setMessage("");
+
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
     });
 
     if (error) {
-        setMessage(error.message);
-    } else {
-        setMessage("Check your email for verification");
+        alert(error.message);
+        return;
     }
+
+    const userId = data.user?.id;
+
+    if (!userId) {
+        alert("User creation failed");
+        return;
+    }
+
+    const { error: profileError } = await supabase
+        .from("profiles")
+        .insert([
+        {
+            id: userId,
+            role: role,
+            name: name,
+            is_verified: false, // New vendors are unverified by default
+        },
+        ]);
+
+    if (profileError) {
+        console.error(profileError.message);
+        return;
+    }
+
+    setMessage("Account created successfully !!!");
+
+    setTimeout(() => {
+        navigate("/login");
+    }, 1500);
   };
-  {message && <p className="text-green-600 text-center">{message}</p>}
+
 
   return (
     <section className="min-h-screen bg-neutral-100 ">
@@ -53,12 +84,15 @@ export default function VendorRegister() {
 
             {/* FORM */}
             <div className="mt-6 space-y-4">
+            <Input type="text" placeholder="Name" onChange={(e) => setName(e.target.value)} />
             <Input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             <Input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
             <Button onClick={handleRegister} className="w-full rounded-full py-6 text-lg">
                 Register
             </Button>
+            {message && (<p className="text-green-600 text-center mt-2">{message}</p>)}
+
             </div>
 
             {/* FOOTER */}

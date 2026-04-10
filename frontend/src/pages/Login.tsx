@@ -20,9 +20,31 @@ export default function Login() {
     });
 
     if (error) {
-        console.error(error.message);
-    } else {
-        console.log("Logged in:", data);
+        alert(error.message);
+        return;
+    }
+
+    const userId = data.user.id;
+
+    // fetch role
+    const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+    if (profileError) {
+        console.error(profileError);
+        return;
+    }
+
+    // redirect based on role
+    if (profile.role === "customer") {
+        navigate("/shop");
+    } else if (profile.role === "vendor") {
+        navigate("/vendor");
+    } else if (profile.role === "admin") {
+        navigate("/admin");
     }
   };
 

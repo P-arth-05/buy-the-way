@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ManagedProduct, useProductWorkflow } from "@/contexts/ProductWorkflowContext";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/com.buytheway.common.utils";
 import { toast } from "sonner";
 
 const statusStyles = {

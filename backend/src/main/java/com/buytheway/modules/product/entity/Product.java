@@ -57,7 +57,11 @@ public class Product {
             this.status = ProductStatus.PENDING;
         }
         if (this.rating == null) {
+<<<<<<< newbranch
             this.rating = BigDecimal.valueOf(0.0);
+=======
+            this.rating = BigDecimal.ZERO;
+>>>>>>> main
         }
         if (this.reviews == null) {
             this.reviews = 0;

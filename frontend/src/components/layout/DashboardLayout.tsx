@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/com.buytheway.common.utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
