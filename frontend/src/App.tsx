@@ -25,6 +25,7 @@ import NotFound from "@/pages/NotFound";
 // Add this near your other customer page imports
 import OrderHistoryPage from "@/pages/customer/OrderHistoryPage";
 import AboutPage from "@/pages/customer/AboutPage";
+import ProfilePage from "@/pages/customer/ProfilePage";
 import FAQPage from "@/pages/customer/FAQPage";
 import ReturnsPage from "@/pages/customer/ReturnsPage";
 import TermsPage from "@/pages/customer/TermsPage";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-tracking" element={<OrderTrackingPage />} />
               <Route path="/order-history" element={<OrderHistoryPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/returns" element={<ReturnsPage />} />

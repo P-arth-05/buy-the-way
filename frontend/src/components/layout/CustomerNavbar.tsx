@@ -50,6 +50,7 @@ export default function CustomerNavbar() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild><Link to="/profile" className="cursor-pointer flex items-center gap-2"><User className="h-4 w-4" /> Edit Info</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/order-history" className="cursor-pointer flex items-center gap-2"><Package className="h-4 w-4" /> Order History</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/order-tracking" className="cursor-pointer flex items-center gap-2"><Truck className="h-4 w-4" /> Track Current Order</Link></DropdownMenuItem>
               <DropdownMenuSeparator />

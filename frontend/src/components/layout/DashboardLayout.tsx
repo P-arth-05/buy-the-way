@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store } from "lucide-react";
 import { cn } from "@/lib/com.buytheway.common.utils";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +15,14 @@ import {
 
 interface DashboardLayoutProps {
   role: "vendor" | "admin";
+}
+
+interface VendorProfileView {
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  memberSince: string;
 }
 
 const vendorLinks = [
@@ -34,6 +44,57 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const location = useLocation();
   const links = role === "vendor" ? vendorLinks : adminLinks;
   const title = role === "vendor" ? "Vendor Panel" : "Admin Panel";
+  const [vendorProfile, setVendorProfile] = useState<VendorProfileView | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  useEffect(() => {
+    if (role !== "vendor") {
+      return;
+    }
+
+    const loadVendorProfile = async () => {
+      setLoadingProfile(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setVendorProfile(null);
+        setLoadingProfile(false);
+        return;
+      }
+
+      let vendorName = (user.user_metadata?.name as string | undefined) ?? "";
+      let vendorRole = "vendor";
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name, role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        vendorName = profile.name || vendorName;
+        vendorRole = profile.role || vendorRole;
+      }
+
+      setVendorProfile({
+        userId: user.id,
+        name: vendorName || "Unknown Vendor",
+        email: user.email || "-",
+        role: vendorRole,
+        memberSince: user.created_at
+          ? new Date(user.created_at).toLocaleDateString(undefined, {
+              month: "short",
+              year: "numeric",
+            })
+          : "-",
+      });
+      setLoadingProfile(false);
+    };
+
+    void loadVendorProfile();
+  }, [role]);
 
   return (
     <div className="min-h-screen flex">
@@ -74,7 +135,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
           <h1 className="text-lg font-semibold">{links.find(l => l.to === location.pathname)?.label || title}</h1>
-          {role === "vendor" ? (
+          {role === "vendor" && (
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -89,31 +150,27 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-muted-foreground">Name</span>
-                    <span className="font-medium">Current Vendor</span>
+                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.name || "-"}</span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
                     <span className="text-muted-foreground">Email</span>
-                    <span className="font-medium">vendor@harmony.com</span>
+                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.email || "-"}</span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Phone</span>
-                    <span className="font-medium">+91 98765 43210</span>
+                    <span className="text-muted-foreground">Role</span>
+                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.role || "-"}</span>
                   </div>
                   <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Store</span>
-                    <span className="font-medium">Harmony Vendor Store</span>
+                    <span className="text-muted-foreground">User ID</span>
+                    <span className="font-medium truncate max-w-[220px] text-right">{loadingProfile ? "Loading..." : vendorProfile?.userId || "-"}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Member Since</span>
-                    <span className="font-medium">Jan 2024</span>
+                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.memberSince || "-"}</span>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
-          ) : (
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
           )}
         </header>
         <main className="flex-1 p-8">

@@ -1,8 +1,18 @@
 package com.buytheway.modules.product.entity;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "products")
@@ -57,11 +67,7 @@ public class Product {
             this.status = ProductStatus.PENDING;
         }
         if (this.rating == null) {
-<<<<<<< newbranch
-            this.rating = BigDecimal.valueOf(0.0);
-=======
             this.rating = BigDecimal.ZERO;
->>>>>>> main
         }
         if (this.reviews == null) {
             this.reviews = 0;
