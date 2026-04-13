@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.buytheway.modules.product.dto.ProductDTO;
 import com.buytheway.modules.product.entity.Product;
@@ -13,6 +14,7 @@ import com.buytheway.modules.product.entity.ProductStatus;
 import com.buytheway.modules.product.repository.ProductRepository;
 
 @Service
+@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -38,29 +40,34 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> getApprovedProducts() {
         return productRepository.findByStatus(ProductStatus.APPROVED).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> getProductsByCategory(String category) {
         return productRepository.findByStatusAndCategory(ProductStatus.APPROVED, category).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> getProductsByVendor(String vendor) {
         return productRepository.findByVendor(vendor).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<ProductDTO> getProductById(Long id) {
         return productRepository.findById(id)
                 .map(this::mapEntityToDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> searchProducts(String keyword) {
         return productRepository.searchApprovedProductsByName(keyword).stream()
                 .map(this::mapEntityToDTO)

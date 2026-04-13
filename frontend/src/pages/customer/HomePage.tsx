@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { MOCK_PRODUCTS, CATEGORIES } from "@/data/mockData";
 import ProductCard from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { getApprovedProducts, ProductDTO } from "@/lib/productApi";
+
+type HomeProduct = Omit<ProductDTO, "id"> & { id: string };
 
 
 export default function HomePage() {
@@ -14,17 +16,37 @@ export default function HomePage() {
   const [searchParams] = useSearchParams();
   const searchQuery = (searchParams.get("search") || "").toLowerCase();
 
+  const [products, setProducts] = useState<HomeProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState([5000]); 
-  const [minRating, setMinRating] = useState(0); // NEW: Rating State
-  
-  const brands = Array.from(new Set(MOCK_PRODUCTS.map(p => p.vendor)));
+  const [priceRange, setPriceRange] = useState([5000]);
+  const [minRating, setMinRating] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState("All");
 
-  const approvedProducts = MOCK_PRODUCTS.filter((product) => product.status === "approved");
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await getApprovedProducts();
+        setProducts(
+          response.data.map((product) => ({
+            ...product,
+            id: String(product.id ?? ""),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to load approved products", error);
+      }
+    };
 
-  // Apply All Filters (including Search & Rating)
-  const displayedProducts = approvedProducts.filter((product) => {
+    void loadProducts();
+  }, []);
+
+  const brands = useMemo(() => Array.from(new Set(products.map((product) => product.vendor))), [products]);
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(products.map((product) => product.category)))],
+    [products]
+  );
+
+  const displayedProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery) || product.description.toLowerCase().includes(searchQuery);
     const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
     const matchesBrand = selectedBrand === "All" || product.vendor === selectedBrand;
@@ -49,7 +71,7 @@ export default function HomePage() {
               <div className="space-y-3">
                 <Label className="text-base font-semibold">Category</Label>
                 <div className="flex flex-col gap-2">
-                  {CATEGORIES.map((category) => (
+                  {categories.map((category) => (
                     <Button key={category} variant={selectedCategory === category ? "default" : "ghost"} className="justify-start h-8 px-2" onClick={() => setSelectedCategory(category)}>
                       {category}
                     </Button>

@@ -9,9 +9,14 @@ const ApprovalsPage = () => {
   const pendingProducts = products.filter((product) => product.status === "pending");
   const pendingCategoryRequests = categoryRequests.filter((request) => request.status === "pending");
 
-  const handleProductAction = (id: string, action: "approved" | "rejected") => {
-    updateProductStatus(id, action);
-    toast.success(`Product ${action}.`);
+  const handleProductAction = async (id: string, action: "approved" | "rejected") => {
+    try {
+      await updateProductStatus(id, action);
+      toast.success(`Product ${action}.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update product status.";
+      toast.error(message);
+    }
   };
 
   const handleCategoryAction = (id: string, action: "approved" | "rejected") => {

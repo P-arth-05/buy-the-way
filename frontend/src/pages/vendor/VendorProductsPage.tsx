@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ManagedProduct, useProductWorkflow } from "@/contexts/ProductWorkflowContext";
+import { useVendor } from "@/contexts/VendorContext";
 import { cn } from "@/lib/com.buytheway.common.utils";
 import { toast } from "sonner";
 
@@ -12,8 +13,14 @@ const statusStyles = {
 
 const VendorProductsPage = () => {
   const { products, updateProductDescription } = useProductWorkflow();
+  const { vendor } = useVendor();
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [draftDescription, setDraftDescription] = useState("");
+
+  const vendorProducts = useMemo(
+    () => products.filter((p) => p.vendor === vendor?.name),
+    [products, vendor?.name]
+  );
 
   const startEditing = (product: ManagedProduct) => {
     setEditingProductId(product.id);
@@ -25,17 +32,22 @@ const VendorProductsPage = () => {
     setDraftDescription("");
   };
 
-  const saveDescription = (productId: string) => {
+  const saveDescription = async (productId: string) => {
     const trimmedDescription = draftDescription.trim();
     if (!trimmedDescription) {
       toast.error("Description cannot be empty.");
       return;
     }
 
-    updateProductDescription(productId, trimmedDescription);
-    setEditingProductId(null);
-    setDraftDescription("");
-    toast.success("Product description updated.");
+    try {
+      await updateProductDescription(productId, trimmedDescription);
+      setEditingProductId(null);
+      setDraftDescription("");
+      toast.success("Product description updated.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update product description.";
+      toast.error(message);
+    }
   };
 
   return (
@@ -54,7 +66,7 @@ const VendorProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => {
+            {vendorProducts.map((p) => {
               const isEditing = editingProductId === p.id;
 
               return (

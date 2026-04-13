@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store } from "lucide-react";
 import { cn } from "@/lib/com.buytheway.common.utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { VendorProvider } from "@/contexts/VendorContext";
 import {
   Dialog,
   DialogContent,
@@ -42,61 +43,76 @@ const adminLinks = [
 
 const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const links = role === "vendor" ? vendorLinks : adminLinks;
   const title = role === "vendor" ? "Vendor Panel" : "Admin Panel";
   const [vendorProfile, setVendorProfile] = useState<VendorProfileView | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (role !== "vendor") {
-      return;
-    }
+    const checkAuth = async () => {
+      setChecking(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-    const loadVendorProfile = async () => {
-      setLoadingProfile(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        if (!user) {
+          navigate("/login?from=" + location.pathname);
+          return;
+        }
 
-      if (!user) {
-        setVendorProfile(null);
+        if (role === "vendor") {
+          let vendorName = (user.user_metadata?.name as string | undefined) ?? "";
+          let vendorRole = "vendor";
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("name, role")
+            .eq("id", user.id)
+            .single();
+
+          if (profile) {
+            vendorName = profile.name || vendorName;
+            vendorRole = profile.role || vendorRole;
+          }
+
+          setVendorProfile({
+            userId: user.id,
+            name: vendorName || "Unknown Vendor",
+            email: user.email || "-",
+            role: vendorRole,
+            memberSince: user.created_at
+              ? new Date(user.created_at).toLocaleDateString(undefined, {
+                  month: "short",
+                  year: "numeric",
+                })
+              : "-",
+          });
+        }
+      } catch (error) {
+        console.error("Auth check failed", error);
+        navigate("/login");
+      } finally {
         setLoadingProfile(false);
-        return;
+        setChecking(false);
       }
-
-      let vendorName = (user.user_metadata?.name as string | undefined) ?? "";
-      let vendorRole = "vendor";
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("name, role")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        vendorName = profile.name || vendorName;
-        vendorRole = profile.role || vendorRole;
-      }
-
-      setVendorProfile({
-        userId: user.id,
-        name: vendorName || "Unknown Vendor",
-        email: user.email || "-",
-        role: vendorRole,
-        memberSince: user.created_at
-          ? new Date(user.created_at).toLocaleDateString(undefined, {
-              month: "short",
-              year: "numeric",
-            })
-          : "-",
-      });
-      setLoadingProfile(false);
     };
 
-    void loadVendorProfile();
-  }, [role]);
+    void checkAuth();
+  }, [role, navigate, location.pathname]);
 
-  return (
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const layoutContent = (
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r flex flex-col shrink-0">
@@ -179,6 +195,8 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       </div>
     </div>
   );
+
+  return role === "vendor" ? <VendorProvider>{layoutContent}</VendorProvider> : layoutContent;
 };
 
 export default DashboardLayout;

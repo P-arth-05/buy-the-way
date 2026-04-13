@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProductWorkflow } from "@/contexts/ProductWorkflowContext";
+import { useVendor } from "@/contexts/VendorContext";
 import { toast } from "sonner";
 
 const AddProductPage = () => {
   const { categories, addProduct, requestCategory } = useProductWorkflow();
+  const { vendor, loading: vendorLoading } = useVendor();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
@@ -15,8 +17,13 @@ const AddProductPage = () => {
   const [stock, setStock] = useState("");
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!vendor) {
+      toast.error("Please log in first.");
+      return;
+    }
 
     const finalCategory = category.trim();
     if (!finalCategory) {
@@ -24,23 +31,28 @@ const AddProductPage = () => {
       return;
     }
 
-    addProduct({
-      name: name.trim(),
-      price: Number(price),
-      category: finalCategory,
-      image: image.trim() || "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=400&fit=crop",
-      description: description.trim(),
-      stock: Number(stock),
-      vendor: "Current Vendor",
-    });
+    try {
+      await addProduct({
+        name: name.trim(),
+        price: Number(price),
+        category: finalCategory,
+        image: image.trim() || "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=400&fit=crop",
+        description: description.trim(),
+        stock: Number(stock),
+        vendor: vendor.name,
+      });
 
-    toast.success("Product submitted and sent for admin approval.");
-    setName("");
-    setPrice("");
-    setCategory("");
-    setImage("");
-    setDescription("");
-    setStock("");
+      toast.success("Product submitted and sent for admin approval.");
+      setName("");
+      setPrice("");
+      setCategory("");
+      setImage("");
+      setDescription("");
+      setStock("");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to submit product.";
+      toast.error(message);
+    }
   };
 
   const handleCategoryRequest = (e: React.FormEvent) => {
@@ -57,6 +69,8 @@ const AddProductPage = () => {
   return (
     <div className="max-w-2xl">
       <h2 className="text-xl font-bold mb-6">Add New Product</h2>
+      {vendorLoading && <p className="text-muted-foreground mb-4">Loading vendor info...</p>}
+      {vendor && <p className="text-sm text-muted-foreground mb-4">Vendor: <span className="font-medium">{vendor.name}</span></p>}
       <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-soft p-6 space-y-5">
         <div>
           <Label>Product Name</Label>
