@@ -67,7 +67,7 @@ const ApprovalsPage = () => {
                 <h3 className="font-semibold">{p.name}</h3>
                 <p className="text-sm text-muted-foreground">{p.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">${p.price.toFixed(2)}</span>
+                  <span className="text-sm font-medium">₹{p.price.toFixed(2)}</span>
                   <span className="text-xs text-muted-foreground">by {p.vendor}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Category: {p.category} ({p.categoryStatus || "approved"})</div>
