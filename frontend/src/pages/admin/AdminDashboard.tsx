@@ -18,11 +18,6 @@ interface ProductRow {
   status: "pending" | "approved" | "rejected";
 }
 
-interface OrderRow {
-  id: number;
-  status: string;
-}
-
 const API_BASE_URL =
   (globalThis as { __API_BASE_URL__?: string }).__API_BASE_URL__ ||
   "http://localhost:8080";
@@ -33,7 +28,8 @@ const AdminDashboard = () => {
   const [apiLatencyMs, setApiLatencyMs] = useState<number | null>(null);
   const [customers, setCustomers] = useState<UserRow[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
-  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [productCount, setProductCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
   const [vendorsCount, setVendorsCount] = useState(0);
   const [lastSyncedAt, setLastSyncedAt] = useState<string>("");
 
@@ -42,12 +38,18 @@ const AdminDashboard = () => {
       setLoading(true);
       const startedAt = performance.now();
 
-      const [usersRes, productsRes, ordersRes, vendorsRes] = await Promise.allSettled([
+      const [usersRes, productCountRes, productsRes, ordersRes, vendorsRes] = await Promise.allSettled([
         fetch(`${API_BASE_URL}/api/users`).then(async (response) => {
           if (!response.ok) {
             throw new Error("Failed to fetch users");
           }
           return (await response.json()) as ApiResponse<UserRow[]>;
+        }),
+        fetch(`${API_BASE_URL}/api/products/count`).then(async (response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch product count");
+          }
+          return (await response.json()) as ApiResponse<number>;
         }),
         fetch(`${API_BASE_URL}/api/products`).then(async (response) => {
           if (!response.ok) {
@@ -55,11 +57,11 @@ const AdminDashboard = () => {
           }
           return (await response.json()) as ApiResponse<ProductRow[]>;
         }),
-        fetch(`${API_BASE_URL}/orders`).then(async (response) => {
+        fetch(`${API_BASE_URL}/api/orders/count`).then(async (response) => {
           if (!response.ok) {
-            throw new Error("Failed to fetch orders");
+            throw new Error("Failed to fetch order count");
           }
-          return (await response.json()) as ApiResponse<OrderRow[]>;
+          return (await response.json()) as ApiResponse<number>;
         }),
         supabase
           .from("profiles")
@@ -71,12 +73,17 @@ const AdminDashboard = () => {
       setApiLatencyMs(Math.round(endedAt - startedAt));
 
       const usersOk = usersRes.status === "fulfilled";
+      const productCountOk = productCountRes.status === "fulfilled";
       const productsOk = productsRes.status === "fulfilled";
       const ordersOk = ordersRes.status === "fulfilled";
-      setApiHealthy(usersOk && productsOk && ordersOk);
+      setApiHealthy(usersOk && productCountOk && productsOk && ordersOk);
 
       if (usersOk) {
         setCustomers(usersRes.value.data || []);
+      }
+
+      if (productCountOk) {
+        setProductCount(productCountRes.value.data || 0);
       }
 
       if (productsOk) {
@@ -84,7 +91,7 @@ const AdminDashboard = () => {
       }
 
       if (ordersOk) {
-        setOrders(ordersRes.value.data || []);
+        setOrderCount(ordersRes.value.data || 0);
       }
 
       if (vendorsRes.status === "fulfilled") {
@@ -119,15 +126,15 @@ const AdminDashboard = () => {
         />
         <StatCard
           label="Total Products"
-          value={loading ? "..." : products.length}
+          value={loading ? "..." : productCount}
           icon={<Package className="h-4 w-4 text-foreground" />}
           trend={loading ? "Loading" : `${pendingApprovals} pending`}
         />
         <StatCard
           label="Total Orders"
-          value={loading ? "..." : orders.length}
+          value={loading ? "..." : orderCount}
           icon={<ShoppingBag className="h-4 w-4 text-foreground" />}
-          trend="From order table"
+          trend="From order count"
         />
         <StatCard
           label="Total Vendors"

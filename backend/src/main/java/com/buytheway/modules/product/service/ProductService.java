@@ -41,6 +41,11 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public long getProductCount() {
+        return productRepository.count();
+    }
+
+    @Transactional(readOnly = true)
     public List<ProductDTO> getApprovedProducts() {
         return productRepository.findByStatus(ProductStatus.APPROVED).stream()
                 .map(this::mapEntityToDTO)

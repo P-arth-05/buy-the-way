@@ -32,6 +32,17 @@ public class ProductController {
     }
 
     /**
+     * Get total product count
+     * GET /api/products/count
+     */
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Long>> getProductCount() {
+        return ResponseEntity.ok(
+                new ApiResponse<>("Product count retrieved successfully", productService.getProductCount())
+        );
+    }
+
+    /**
      * Get all approved products
      * GET /api/products/approved
      */

@@ -1,5 +1,6 @@
 package com.buytheway.modules.order.controller;
 
+import com.buytheway.common.response.ApiResponse;
 import com.buytheway.modules.order.dto.OrderDTO;
 import com.buytheway.modules.order.dto.OrderResponseDTO;
 import com.buytheway.modules.order.entity.Order;
@@ -55,6 +56,18 @@ public class OrderController {
         }
 
         return ResponseEntity.ok(new OrderResponseDTO(order, product));
+    }
+
+    /* ---------------- GET ALL ORDERS ---------------- */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getAllOrders() {
+        return ResponseEntity.ok(new ApiResponse<>("Orders fetched successfully", orderService.getAllOrders()));
+    }
+
+    /* ---------------- GET ORDER COUNT ---------------- */
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Long>> getOrderCount() {
+        return ResponseEntity.ok(new ApiResponse<>("Order count fetched successfully", orderService.getOrderCount()));
     }
 
     /* ---------------- GET USER ORDERS ---------------- */

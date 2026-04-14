@@ -27,6 +27,21 @@ public class OrderService {
     }
 
     /* ------------------ GET ORDERS ------------------ */
+    public long getOrderCount() {
+        return orderRepository.count();
+    }
+
+    public List<OrderResponseDTO> getAllOrders() {
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+
+        return orders.stream()
+                .map(order -> {
+                    var product = getProduct(order.getProductId());
+                    return new OrderResponseDTO(order, product);
+                })
+                .toList();
+    }
+
     public List<OrderResponseDTO> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
