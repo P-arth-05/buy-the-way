@@ -36,6 +36,9 @@ public class OrderService {
         if (dto.getQuantity() <= 0)
             throw new BadRequestException("Quantity must be > 0");
 
+        if (dto.getEmail() == null || dto.getEmail().isBlank())
+            throw new BadRequestException("Email is required");
+
         ProductDTO product = productService.getProductById(dto.getProductId())
                 .orElseThrow(() -> new BadRequestException("Product not found"));
 
@@ -54,8 +57,10 @@ public class OrderService {
         order.setUserId(userId);
         order.setQuantity(dto.getQuantity());
         order.setTotalPrice(totalPrice);
-        order.setEmail(dto.getEmail());
         order.setStatus(OrderStatus.CREATED);
+
+        // ✅🔥 CRITICAL FIX
+        order.setEmail(dto.getEmail());
 
         Order savedOrder = orderRepository.save(order);
 
@@ -66,7 +71,7 @@ public class OrderService {
         return savedOrder;
     }
 
-    /* ------------------ GET ORDERS (FIXED) ------------------ */
+    /* ------------------ GET ORDERS ------------------ */
     public List<OrderResponseDTO> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
@@ -78,21 +83,17 @@ public class OrderService {
                 .toList();
     }
 
-    /* ------------------ GET PRODUCT ------------------ */
     public ProductDTO getProduct(Long productId) {
         return productService.getProductById(productId)
                 .orElseThrow(() -> new BadRequestException("Product not found"));
     }
 
-    /* ------------------ GET ORDER ------------------ */
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Order not found"));
     }
 
-    /* ------------------ CANCEL ORDER ------------------ */
     public Order cancelOrder(Long id) {
-
         Order order = getOrderById(id);
 
         if (order.getStatus() == OrderStatus.SHIPPED ||
@@ -104,7 +105,6 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    /* ------------------ UPDATE STATUS ------------------ */
     public Order updateStatus(Long id, OrderStatus status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));

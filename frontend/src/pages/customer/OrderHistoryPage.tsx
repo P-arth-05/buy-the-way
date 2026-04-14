@@ -1,41 +1,78 @@
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { getMyOrders, cancelOrder } from "@/lib/orderApi";
 import { Button } from "@/components/ui/button";
-import { Package, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
 export default function OrderHistoryPage() {
-  // Mock data for past orders
-  const pastOrders = [
-    { id: "ORD-987654", date: new Date().toLocaleDateString(), total: 124.97, status: "In Transit", items: 3 },
-    { id: "ORD-123456", date: "2026-02-20", total: 49.99, status: "Delivered", items: 1 },
-  ];
+  const [orders, setOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const data = await getMyOrders();
+      setOrders(data);
+    } catch (err) {
+      toast.error("Failed to fetch orders");
+    }
+  };
+
+  const handleCancel = async (orderId: number) => {
+    try {
+      await cancelOrder(orderId);
+      toast.success("Order cancelled");
+      fetchOrders();
+    } catch {
+      toast.error("Cancel failed");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">My Orders</h1>
-      <div className="space-y-4">
-        {pastOrders.map((order) => (
-          <Card key={order.id}>
-            <CardHeader className="flex flex-row items-center justify-between bg-muted/20 pb-4">
+      <h1 className="text-3xl font-bold mb-6">My Orders</h1>
+
+      {orders.length === 0 ? (
+        <p>No orders found</p>
+      ) : (
+        orders.map((order) => (
+          <div key={order.id} className="border p-4 rounded mb-4">
+
+            <h2 className="text-xl font-semibold">Order #{order.id}</h2>
+            <p>Status: {order.status}</p>
+
+            {/* ✅ PRODUCT UI */}
+            <div className="flex gap-4 items-center mt-3">
+              <img
+                src={order.productImage}
+                alt={order.productName}
+                className="w-16 h-16 object-cover rounded"
+              />
+
               <div>
-                <CardTitle className="text-lg">Order #{order.id}</CardTitle>
-                <p className="text-sm text-muted-foreground">Placed on {order.date}</p>
+                <p className="font-semibold">{order.productName}</p>
+                <p className="text-sm text-gray-500">
+                  {order.productDescription}
+                </p>
               </div>
-              <div className="text-right">
-                <p className="font-bold">₹{order.total.toFixed(2)}</p>
-                <p className="text-sm text-green-600 font-medium">{order.status}</p>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4 flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">{order.items} item(s) in this order.</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/order-tracking" state={{ orderId: order.id, status: order.status }} className="gap-2">
-                  View Details <ArrowRight className="h-4 w-4" />
-                </Link>
+            </div>
+
+            <p className="mt-2">Quantity: {order.quantity}</p>
+            <p>Total: ₹{order.totalPrice}</p>
+
+            {order.status === "CREATED" && (
+              <Button
+                variant="destructive"
+                onClick={() => handleCancel(order.id)}
+                className="mt-3"
+              >
+                Cancel Order
               </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

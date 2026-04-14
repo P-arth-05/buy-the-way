@@ -1,170 +1,239 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useCart } from "@/contexts/CartContext";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { createOrder } from "@/lib/orderApi";
 import { toast } from "sonner";
-import { CheckCircle2, CreditCard, Wallet, Banknote, Smartphone } from "lucide-react";
 
-const checkoutSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
-  address: z.string().min(5, "Address is required"),
-  city: z.string().min(2, "City is required"),
-  zipCode: z.string().min(4, "Zip code is required"),
-  paymentMethod: z.enum(["card", "upi", "netbanking", "wallet", "cod"]),
-});
-
-type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+type CheckoutFormValues = {
+  fullName: string;
+  email: string;
+  address: string;
+  city: string;
+  pincode: string;
+  paymentMethod: string;
+};
 
 export default function CheckoutPage() {
-  const { total, clearCart, items } = useCart();
   const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { items, clearCart, total } = useCart();
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: { paymentMethod: "card" },
+  const [form, setForm] = useState<CheckoutFormValues>({
+    fullName: "",
+    email: "",
+    address: "",
+    city: "",
+    pincode: "",
+    paymentMethod: "cod",
   });
 
-  const paymentMethod = watch("paymentMethod");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  if (items.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <Button onClick={() => navigate("/")}>Go back to shopping</Button>
-      </div>
-    );
-  }
+  // ✅ NEW: email error state
+  const [emailError, setEmailError] = useState(false);
 
-  const onSubmit = (data: CheckoutFormValues) => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      const mockOrderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-      clearCart();
+  const handleChange = (e: any) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const onSubmit = async () => {
+    try {
+      setIsProcessing(true);
+
+      // ✅ EMAIL VALIDATION
+      if (!form.email) {
+        setEmailError(true);
+        toast.error("Please enter your email");
+        return;
+      } else {
+        setEmailError(false);
+      }
+
+      // ✅ COD FLOW
+      if (form.paymentMethod === "cod") {
+        for (const item of items) {
+          await createOrder(item.product.id, item.quantity, form.email);
+        }
+
+        toast.success("Order placed successfully");
+        clearCart();
+        navigate("/order-history");
+        return;
+      }
+
+      // ✅ RAZORPAY FLOW
+      const amount = total * 100;
+
+      const res = await fetch(
+        "http://localhost:8080/api/payments/create-razorpay-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount }),
+        }
+      );
+
+      const order = await res.json();
+
+      const options = {
+        key: "rzp_test_Sd4ompYX4WwxTy",
+        amount: order.amount,
+        currency: "INR",
+        name: "Buy The Way",
+        description: "Order Payment",
+        order_id: order.id,
+
+        handler: async function () {
+          for (const item of items) {
+            await createOrder(item.product.id, item.quantity, form.email);
+          }
+
+          toast.success("Payment successful");
+          clearCart();
+          navigate("/order-history");
+        },
+
+        prefill: {
+          name: form.fullName,
+          email: form.email,
+        },
+
+        theme: {
+          color: "#111827",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
+    } catch (err: any) {
+      if (err?.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
       setIsProcessing(false);
-      toast.success("Order placed successfully!", {
-        description: `Your Order ID is ${mockOrderId}`,
-      });
-      navigate("/order-tracking", { state: { orderId: mockOrderId } });
-    }, 1500);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-3xl font-semibold mb-8 text-center text-gray-900">
+        Checkout
+      </h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Shipping Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" placeholder="Parth Agarwal" {...register("fullName")} />
-                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="parth@example.com" {...register("email")} />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Street Address</Label>
-                <Input id="address" placeholder="A-12, Ashok Vihar" {...register("address")} />
-                {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input id="city" placeholder="Delhi" {...register("city")} />
-                  {errors.city && <p className="text-sm text-destructive">{errors.city.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="zipCode">Zip Code</Label>
-                  <Input id="zipCode" placeholder="110052" {...register("zipCode")} />
-                  {errors.zipCode && <p className="text-sm text-destructive">{errors.zipCode.message}</p>}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup 
-                defaultValue="card" 
-                onValueChange={(value) => setValue("paymentMethod", value as CheckoutFormValues["paymentMethod"])}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                {[
-                  { id: "card", label: "Credit/Debit Card", icon: CreditCard },
-                  { id: "upi", label: "UPI", icon: Smartphone },
-                  { id: "netbanking", label: "Net Banking", icon: Banknote },
-                  { id: "wallet", label: "Digital Wallet", icon: Wallet },
-                  { id: "cod", label: "Cash on Delivery", icon: CheckCircle2 },
-                ].map((method) => (
-                  <div key={method.id} className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-colors ${paymentMethod === method.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`} onClick={() => setValue("paymentMethod", method.id as CheckoutFormValues["paymentMethod"])}>
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <Label htmlFor={method.id} className="flex flex-1 items-center gap-2 cursor-pointer">
-                      <method.icon className="h-4 w-4 text-muted-foreground" />
-                      {method.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </CardContent>
-          </Card>
+        {/* LEFT */}
+        <div className="md:col-span-2 space-y-6">
+
+          {/* SHIPPING */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">
+              Shipping
+            </h2>
+
+            <input
+              name="fullName"
+              placeholder="Full Name"
+              value={form.fullName}
+              onChange={handleChange}
+              className="w-full mb-3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+
+            {/* ✅ UPDATED EMAIL INPUT */}
+            <input
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => {
+                handleChange(e);
+                setEmailError(false);
+              }}
+              className={`w-full mb-3 px-4 py-4 text-base border rounded-lg focus:outline-none transition
+                ${emailError
+                  ? "border-red-400 bg-red-50 focus:ring-2 focus:ring-red-300"
+                  : "border-gray-300 focus:ring-2 focus:ring-gray-900"}
+              `}
+            />
+
+            <input
+              name="address"
+              placeholder="Address"
+              value={form.address}
+              onChange={handleChange}
+              className="w-full mb-3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+
+            <input
+              name="city"
+              placeholder="City"
+              value={form.city}
+              onChange={handleChange}
+              className="w-full mb-3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+
+            <input
+              name="pincode"
+              placeholder="Pincode"
+              value={form.pincode}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+          </div>
+
+          {/* PAYMENT */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">
+              Payment
+            </h2>
+
+            <div className="grid grid-cols-2 gap-4">
+              {["card", "upi", "netbanking", "cod"].map((method) => (
+                <label
+                  key={method}
+                  className={`border p-3 rounded-md cursor-pointer flex items-center gap-2 transition ${
+                    form.paymentMethod === method
+                      ? "border-gray-900 bg-gray-100"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={method}
+                    checked={form.paymentMethod === method}
+                    onChange={handleChange}
+                  />
+                  {method === "cod"
+                    ? "Cash on Delivery"
+                    : method.toUpperCase()}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                {items.map((item) => (
-                  <div key={item.product.id} className="flex justify-between text-sm">
-                    <span className="truncate pr-4">{item.quantity}x {item.product.name}</span>
-                    <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal</span>
-                  <span>₹{total.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-              </div>
-              <div className="border-t pt-4 flex justify-between items-center font-bold text-lg">
-                <span>Total</span>
-                <span>₹{total.toFixed(2)}</span>
-              </div>
-              <Button type="submit" className="w-full mt-6" size="lg" disabled={isProcessing}>
-                {isProcessing ? "Processing..." : `Pay ₹${total.toFixed(2)}`}
-              </Button>
-            </CardContent>
-          </Card>
+        {/* RIGHT */}
+        <div className="bg-white p-6 rounded-xl shadow h-fit">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">
+            Total
+          </h2>
+
+          <p className="text-2xl font-bold mb-6 text-gray-900">
+            ₹{total}
+          </p>
+
+          <button
+            onClick={onSubmit}
+            disabled={isProcessing}
+            className="w-full bg-gray-900 text-white py-3 rounded-md hover:bg-gray-800 transition"
+          >
+            {isProcessing ? "Processing..." : "Place Order"}
+          </button>
         </div>
-      </form>
+
+      </div>
     </div>
   );
 }
