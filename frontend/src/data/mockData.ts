@@ -6,78 +6,166 @@ export interface Product {
   category: string;
   description: string;
   stock: number;
-  status: "pending" | "approved" | "rejected";
+  status: "approved";
   vendor: string;
-  rating: number;      // NEW
-  reviews: number;     // NEW
-}
-
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
-export interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  status: "placed" | "shipped" | "delivered";
-  date: string;
+  rating: number;
+  reviews: number;
 }
 
 export const MOCK_PRODUCTS: Product[] = [
-  { 
-    id: "1", 
-    name: "Minimalist Desk Lamp", 
-    price: 1299, 
-    image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400&h=400&fit=crop", 
-    category: "Lighting", 
-    description: "A sleek, modern desk lamp with adjustable brightness and warm LED lighting. Perfect for your workspace.", 
-    stock: 24, 
-    status: "approved", 
-    vendor: "LuxHome", 
-    rating: 4.8, 
-    reviews: 124 
+  {
+    id: "3",
+    name: "Lamp",
+    price: 100,
+    image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15",
+    category: "Lighting",
+    description: "Lamp",
+    stock: 10,
+    status: "approved",
+    vendor: "XY",
+    rating: 0,
+    reviews: 0,
   },
-  { 
-    id: "2", 
-    name: "Ceramic Planter Set", 
-    price: 899, 
-    image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&h=400&fit=crop", 
-    category: "Home & Garden", 
-    description: "Set of 3 handcrafted ceramic planters in neutral tones. Ideal for succulents and small plants.", 
-    stock: 58, 
-    status: "approved", 
-    vendor: "GreenCraft", 
-    rating: 4.5, 
-    reviews: 89 
+  {
+    id: "4",
+    name: "Vase",
+    price: 500,
+    image: "https://plus.unsplash.com/premium_photo-1676836059659-161e0d6ea49e",
+    category: "Home",
+    description: "Vase",
+    stock: 1,
+    status: "approved",
+    vendor: "XY",
+    rating: 0,
+    reviews: 0,
   },
-  { 
-    id: "3", 
-    name: "Linen Throw Blanket", 
-    price: 2499, 
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop", 
-    category: "Textiles", 
-    description: "Soft, breathable linen throw in a calming oatmeal color. Machine washable.", 
-    stock: 15, 
-    status: "approved", 
-    vendor: "CozyThreads", 
-    rating: 4.9, 
-    reviews: 210 
+  {
+    id: "5",
+    name: "Marvel Avengers Oversized Tee",
+    price: 899,
+    image: "https://images.unsplash.com/photo-1565789787624-4caced7af971",
+    category: "T-Shirts",
+    description: "Official Marvel graphic printed oversized cotton t-shirt",
+    stock: 53,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.6,
+    reviews: 142,
   },
-  { 
-    id: "4", 
-    name: "Wooden Serving Board", 
-    price: 1499, 
-    image: "https://images.unsplash.com/photo-1574923203787-ee36eef07c71?q=80&w=1904&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-    category: "Kitchen", 
-    description: "Handcrafted acacia wood serving board. Perfect for cheese, charcuterie, or bread.", 
-    stock: 42, 
-    status: "approved", 
-    vendor: "WoodWorks", 
-    rating: 4.2, 
-    reviews: 45 
-  }
+  {
+    id: "6",
+    name: "Naruto Hidden Leaf Hoodie",
+    price: 1799,
+    image: "https://images.unsplash.com/photo-1659082056845-3b839c7551bf",
+    category: "Hoodies",
+    description: "Black Naruto anime themed fleece hoodie",
+    stock: 31,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.8,
+    reviews: 96,
+  },
+  {
+    id: "7",
+    name: "Basic Grey Joggers",
+    price: 1299,
+    image: "https://images.pexels.com/photos/6165114/pexels-photo-6165114.jpeg",
+    category: "Joggers",
+    description: "Comfort fit grey cotton joggers",
+    stock: 38,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.3,
+    reviews: 58,
+  },
+  {
+    id: "10",
+    name: "Urban Street Sneakers",
+    price: 2499,
+    image: "https://images.pexels.com/photos/27204251/pexels-photo-27204251.jpeg",
+    category: "Sneakers",
+    description: "White sneakers",
+    stock: 18,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.4,
+    reviews: 74,
+  },
+  {
+    id: "13",
+    name: "Hogwarts Red Cap",
+    price: 599,
+    image: "https://images.unsplash.com/photo-1735220985243-93ea40496532",
+    category: "Caps",
+    description: "Cap",
+    stock: 88,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.1,
+    reviews: 27,
+  },
+  {
+    id: "16",
+    name: "Backpack",
+    price: 1999,
+    image: "https://images.pexels.com/photos/18999333/pexels-photo-18999333.jpeg",
+    category: "Backpacks",
+    description: "Backpack",
+    stock: 22,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.5,
+    reviews: 49,
+  },
+  {
+    id: "23",
+    name: "Leather Jacket",
+    price: 3199,
+    image: "https://images.unsplash.com/photo-1727515546577-f7d82a47b51d",
+    category: "Jackets",
+    description: "Jacket",
+    stock: 9,
+    status: "approved",
+    vendor: "The Souled Store",
+    rating: 4.6,
+    reviews: 40,
+  },
+  {
+    id: "26",
+    name: "Fairy Lights",
+    price: 100,
+    image: "https://images.unsplash.com/photo-1511461744085-90a4d1c66be3",
+    category: "Lighting",
+    description: "Lights",
+    stock: 56,
+    status: "approved",
+    vendor: "Home Store",
+    rating: 0,
+    reviews: 0,
+  },
 ];
 
-export const CATEGORIES = ["All", "Lighting", "Home & Garden", "Textiles", "Kitchen"];
+export const CATEGORIES = [
+  "All",
+  "T-Shirts",
+  "Joggers",
+  "Caps",
+  "Backpacks",
+  "Home",
+  "Lighting",
+  "Jackets",
+  "Sneakers",
+  "Hoodies",
+];
+
+export const CATEGORY_IMAGES: Record<string, string> = {
+  "T-Shirts": "https://images.pexels.com/photos/6311392/pexels-photo-6311392.jpeg",
+  "Joggers": "https://images.pexels.com/photos/6165114/pexels-photo-6165114.jpeg",
+  "Caps": "https://images.unsplash.com/photo-1735220985243-93ea40496532",
+  "Backpacks": "https://images.pexels.com/photos/18999333/pexels-photo-18999333.jpeg",
+  "Home": "https://plus.unsplash.com/premium_photo-1676836059659-161e0d6ea49e",
+  "Lighting": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15",
+  "Jackets": "https://images.unsplash.com/photo-1727515546577-f7d82a47b51d",
+  "Sneakers": "https://images.pexels.com/photos/27204251/pexels-photo-27204251.jpeg",
+  "Hoodies": "https://images.unsplash.com/photo-1659082056845-3b839c7551bf",
+};

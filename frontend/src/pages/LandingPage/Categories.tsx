@@ -1,17 +1,6 @@
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { CATEGORIES } from "@/data/mockData"
-
-const images = {
-  "Lighting":
-    "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800",
-  "Home & Garden":
-    "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=800",
-  "Textiles":
-    "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800",
-  "Kitchen":
-    "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=800",
-}
+import { CATEGORIES, CATEGORY_IMAGES } from "@/data/mockData"
 
 export default function Categories() {
   const navigate = useNavigate()
@@ -44,16 +33,17 @@ export default function Categories() {
             >
               <div className="relative rounded-2xl overflow-hidden group">
 
-                {/* Image */}
+                {/* IMAGE */}
                 <img
-                  src={images[category]}
+                  src={CATEGORY_IMAGES[category]}
+                  alt={category}
                   className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
                 />
 
-                {/* Overlay */}
+                {/* OVERLAY */}
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition" />
 
-                {/* Text */}
+                {/* TEXT */}
                 <div className="absolute bottom-4 left-4 text-white">
                   <p className="text-lg font-medium">{category}</p>
                 </div>

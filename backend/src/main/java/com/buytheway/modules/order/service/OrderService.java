@@ -26,51 +26,6 @@ public class OrderService {
         this.productService = productService;
     }
 
-    /* ------------------ CREATE ORDER ------------------ */
-    @Transactional
-    public Order createOrder(OrderDTO dto, String userId) {
-
-        if (dto.getProductId() == null)
-            throw new BadRequestException("Product ID required");
-
-        if (dto.getQuantity() <= 0)
-            throw new BadRequestException("Quantity must be > 0");
-
-        if (dto.getEmail() == null || dto.getEmail().isBlank())
-            throw new BadRequestException("Email is required");
-
-        ProductDTO product = productService.getProductById(dto.getProductId())
-                .orElseThrow(() -> new BadRequestException("Product not found"));
-
-        if (!product.getStatus().equalsIgnoreCase("approved")) {
-            throw new BadRequestException("Product not available");
-        }
-
-        if (product.getStock() < dto.getQuantity()) {
-            throw new BadRequestException("Insufficient stock");
-        }
-
-        double totalPrice = product.getPrice().doubleValue() * dto.getQuantity();
-
-        Order order = new Order();
-        order.setProductId(dto.getProductId());
-        order.setUserId(userId);
-        order.setQuantity(dto.getQuantity());
-        order.setTotalPrice(totalPrice);
-        order.setStatus(OrderStatus.CREATED);
-
-        // ✅🔥 CRITICAL FIX
-        order.setEmail(dto.getEmail());
-
-        Order savedOrder = orderRepository.save(order);
-
-        // update stock
-        product.setStock(product.getStock() - dto.getQuantity());
-        productService.updateProduct(product.getId(), product);
-
-        return savedOrder;
-    }
-
     /* ------------------ GET ORDERS ------------------ */
     public List<OrderResponseDTO> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -112,4 +67,55 @@ public class OrderService {
         order.setStatus(status);
         return orderRepository.save(order);
     }
+
+    // :contentReference[oaicite:2]{index=2}
+
+private static final int MAX_QTY = 5;
+
+@Transactional
+public Order createOrder(OrderDTO dto, String userId) {
+
+    if (dto.getProductId() == null)
+        throw new BadRequestException("Product ID required");
+
+    if (dto.getQuantity() <= 0)
+        throw new BadRequestException("Quantity must be > 0");
+
+    // ✅ NEW VALIDATION
+    if (dto.getQuantity() > MAX_QTY) {
+        throw new BadRequestException("Max " + MAX_QTY + " items allowed per product");
+    }
+
+    if (dto.getEmail() == null || dto.getEmail().isBlank())
+        throw new BadRequestException("Email is required");
+
+    ProductDTO product = productService.getProductById(dto.getProductId())
+            .orElseThrow(() -> new BadRequestException("Product not found"));
+
+    if (!product.getStatus().equalsIgnoreCase("approved")) {
+        throw new BadRequestException("Product not available");
+    }
+
+    if (product.getStock() < dto.getQuantity()) {
+        throw new BadRequestException("Insufficient stock");
+    }
+
+    double totalPrice = product.getPrice().doubleValue() * dto.getQuantity();
+
+    Order order = new Order();
+    order.setProductId(dto.getProductId());
+    order.setUserId(userId);
+    order.setQuantity(dto.getQuantity());
+    order.setTotalPrice(totalPrice);
+    order.setStatus(OrderStatus.CREATED);
+
+    order.setEmail(dto.getEmail());
+
+    Order savedOrder = orderRepository.save(order);
+
+    product.setStock(product.getStock() - dto.getQuantity());
+    productService.updateProduct(product.getId(), product);
+
+    return savedOrder;
+}
 }

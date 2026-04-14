@@ -38,6 +38,14 @@ export default function CheckoutPage() {
   const onSubmit = async () => {
     try {
       setIsProcessing(true);
+       
+      // :contentReference[oaicite:1]{index=1}
+      const MAX_QTY = 5;
+      if (items.some(item => item.quantity > MAX_QTY)) {
+        toast.error(`Max ${MAX_QTY} items in stock. Please adjust your cart.`);
+        setIsProcessing(false);
+        return;
+      }
 
       // ✅ EMAIL VALIDATION
       if (!form.email) {
