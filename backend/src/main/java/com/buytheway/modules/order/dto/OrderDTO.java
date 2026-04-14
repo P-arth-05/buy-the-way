@@ -3,15 +3,34 @@ package com.buytheway.modules.order.dto;
 public class OrderDTO {
 
     private Long productId;
-    private Long userId;
     private int quantity;
+    
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    // ✅ NEW FIELD
+    private String email;
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getProductId() {
+        return productId;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    // ✅ NEW GETTER/SETTER
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
