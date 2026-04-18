@@ -35,7 +35,8 @@ public class SecurityConfig {
                 "http://localhost:8081",
                 "http://127.0.0.1:8081",
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://buy-the-way.vercel.app/"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

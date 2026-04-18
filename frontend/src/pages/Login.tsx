@@ -13,41 +13,71 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    try {
+        setLoading(true);
+        setErrorMsg("");
+
+        // 1. Authenticate with Supabase
+        const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-    });
+        });
 
-    if (error) {
-        alert(error.message);
+        if (error) {
+        setErrorMsg(error.message);
         return;
-    }
+        }
 
-    const userId = data.user.id;
+        // 2. Safely extract user + session
+        const userId = data?.user?.id;
+        const accessToken = data?.session?.access_token;
 
-    // fetch role
-    const { data: profile, error: profileError } = await supabase
+        if (!userId || !accessToken) {
+        setErrorMsg("Login failed: missing session data");
+        return;
+        }
+
+        // 3. Store token for backend usage
+        localStorage.setItem("access_token", accessToken);
+
+        // (optional) store user id
+        localStorage.setItem("user_id", userId);
+
+        // 4. Fetch role from profiles table
+        const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .single();
 
-    if (profileError) {
+        if (profileError) {
         console.error(profileError);
+        setErrorMsg("Failed to fetch user profile");
         return;
-    }
+        }
 
-    // redirect based on role
-    if (profile.role === "customer") {
+        // 5. Role-based navigation (unchanged logic)
+        if (profile?.role === "customer") {
         navigate("/shop");
-    } else if (profile.role === "vendor") {
+        } else if (profile?.role === "vendor") {
         navigate("/vendor");
-    } else if (profile.role === "admin") {
+        } else if (profile?.role === "admin") {
         navigate("/admin");
-    }
-  };
+        } else {
+        setErrorMsg("Unknown user role");
+        }
 
+    } catch (err) {
+        console.error(err);
+        setErrorMsg("Something went wrong");
+    } finally {
+        setLoading(false);
+    }
+    };
 
   return (
     <section>

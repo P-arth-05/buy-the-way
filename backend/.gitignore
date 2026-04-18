@@ -1,4 +1,4 @@
-.env
+.env.properties
 backend/.env
 target/
 backend/target/

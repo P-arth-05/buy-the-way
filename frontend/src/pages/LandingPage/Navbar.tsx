@@ -27,7 +27,7 @@ export default function Navbar() {
           Buy the Way
         </Link>
 
-        {/* CENTER: NAV LINKS */}
+       {/*
         <nav className="hidden md:flex items-center gap-6 text-md font-medium">
           <Link to="/shop" className="hover:text-primary transition">
             Customer
@@ -38,7 +38,7 @@ export default function Navbar() {
           <Link to="/vendor" className="hover:text-primary transition">
             Vendor
           </Link>
-        </nav>
+        </nav>  */}
 
         {/* RIGHT SECTION */}
         <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export default function Navbar() {
           {/* LOGIN / REGISTER */}
           <Link to="/login">
             <Button variant="outline" className="rounded-full px-4">
-              Login / Register
+              Login 
             </Button>
           </Link>
         </div>
