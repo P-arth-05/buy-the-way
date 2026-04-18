@@ -22,8 +22,20 @@ public class Order {
 
     private LocalDateTime createdAt;
 
-    @Column // ✅ FIXED (no NOT NULL)
+    @Column 
     private String email;
+
+    @Column(name = "full_name")
+    private String fullName;
+    
+    @Column(name = "address")
+    private String address;
+    
+    @Column(name = "city")
+    private String city;
+    
+    @Column(name = "pincode")
+    private String pincode;
 
     public Order() {
         this.status = OrderStatus.CREATED;
@@ -55,4 +67,9 @@ public class Order {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setAddress(String address) { this.address = address; }
+    public void setCity(String city) { this.city = city; }
+    public void setPincode(String pincode) { this.pincode = pincode; }
 }

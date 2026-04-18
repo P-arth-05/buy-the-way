@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMyOrders, cancelOrder } from "@/lib/orderApi";
+import { getMyOrders, cancelOrder, returnOrder } from "@/lib/orderApi";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -26,6 +26,16 @@ export default function OrderHistoryPage() {
       fetchOrders();
     } catch {
       toast.error("Cancel failed");
+    }
+  };
+
+  const handleReturn = async (orderId: number) => {
+    try {
+      await returnOrder(orderId);
+      toast.success("Order returned");
+      fetchOrders();
+    } catch {
+      toast.error("Return failed");
     }
   };
 
@@ -62,13 +72,27 @@ export default function OrderHistoryPage() {
             <p>Total: ₹{order.totalPrice}</p>
 
             {order.status === "CREATED" && (
-              <Button
-                variant="destructive"
-                onClick={() => handleCancel(order.id)}
-                className="mt-3"
-              >
-                Cancel Order
-              </Button>
+              <section>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleCancel(order.id)}
+                  className="mt-3"
+                >
+                  Cancel Order
+                </Button>
+              </section>
+            )}
+
+            {order.status === "DELIVERED" && (
+              <section>
+                <Button
+                  variant="outline"
+                  onClick={() => handleReturn(order.id)}
+                  className="mt-3"
+                >
+                  Return Order
+                </Button>
+              </section>
             )}
           </div>
         ))

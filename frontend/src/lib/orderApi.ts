@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 
 const API = "http://localhost:8080/api/orders";
 
-// 🔐 helper to get access token
+
 const getToken = async () => {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -14,12 +14,15 @@ const getToken = async () => {
   return token;
 };
 
-// ✅ CREATE ORDER (UPDATED — email added)
-export const createOrder = async (
-  productId: number,
-  quantity: number,
-  email: string
-) => {
+export const createOrder = async (data: {
+  productId: number;
+  quantity: number;
+  email: string;
+  fullName: string;
+  address: string;
+  city: string;
+  pincode: string;
+}) => {
   const token = await getToken();
 
   const res = await fetch(API, {
@@ -28,11 +31,7 @@ export const createOrder = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      productId,
-      quantity,
-      email, // ✅ NEW
-    }),
+    body: JSON.stringify(data), 
   });
 
   if (!res.ok) {
@@ -42,7 +41,7 @@ export const createOrder = async (
   return res.json();
 };
 
-// ✅ GET MY ORDERS
+
 export const getMyOrders = async () => {
   const token = await getToken();
 
@@ -59,7 +58,7 @@ export const getMyOrders = async () => {
   return res.json();
 };
 
-// ✅ CANCEL ORDER
+
 export const cancelOrder = async (orderId: number) => {
   const token = await getToken();
 
@@ -77,7 +76,25 @@ export const cancelOrder = async (orderId: number) => {
   return res.json();
 };
 
-// ✅ GET ORDER BY ID
+
+export const returnOrder = async (orderId: number) => {
+  const token = await getToken();
+
+  const res = await fetch(`${API}/${orderId}/return`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Return failed");
+  }
+
+  return res.json();
+};
+
+
 export const getOrderById = async (orderId: number) => {
   const token = await getToken();
 
