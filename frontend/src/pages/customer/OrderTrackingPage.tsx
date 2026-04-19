@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getOrderById } from "../../lib/orderApi";
+import { useNavigate } from "react-router-dom";
 
 type Order = {
   id: number;
@@ -10,6 +11,8 @@ export default function OrderTrackingPage() {
   const [orderId, setOrderId] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
 
   const handleTrack = async () => {
     try {
@@ -43,6 +46,13 @@ export default function OrderTrackingPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      <button
+        onClick={() => navigate("/shop")}
+        className="flex items-center gap-1 text-sm text-gray-600 hover:text-black mb-4"
+      >
+        <span className="text-lg">←</span>
+        Back to shop
+      </button>
       {/* TITLE */}
       <h1 className="text-3xl font-semibold text-center mb-2">
         Track Your Order

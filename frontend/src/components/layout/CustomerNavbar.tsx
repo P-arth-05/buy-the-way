@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShoppingCart, User, Package, LogOut, Search, Truck } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function CustomerNavbar() {
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const { logout } = useLogout()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +56,7 @@ export default function CustomerNavbar() {
               <DropdownMenuItem asChild><Link to="/order-history" className="cursor-pointer flex items-center gap-2"><Package className="h-4 w-4" /> Order History</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/order-tracking" className="cursor-pointer flex items-center gap-2"><Truck className="h-4 w-4" /> Track Current Order</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2"><LogOut className="h-4 w-4" /> Log out</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2" onClick={logout}><LogOut className="h-4 w-4" /> Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>
