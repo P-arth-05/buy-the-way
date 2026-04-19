@@ -1,18 +1,20 @@
 package com.buytheway.modules.order.service;
 
+import java.util.List;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import com.buytheway.modules.order.repository.OrderRepository;
-import com.buytheway.modules.product.service.ProductService;
-import com.buytheway.modules.product.dto.ProductDTO;
+import com.buytheway.common.exception.BadRequestException;
 import com.buytheway.modules.order.dto.OrderDTO;
+import com.buytheway.modules.order.dto.OrderReportDTO;
 import com.buytheway.modules.order.dto.OrderResponseDTO;
 import com.buytheway.modules.order.entity.Order;
 import com.buytheway.modules.order.entity.OrderStatus;
-import com.buytheway.common.exception.BadRequestException;
+import com.buytheway.modules.order.repository.OrderRepository;
+import com.buytheway.modules.product.dto.ProductDTO;
+import com.buytheway.modules.product.service.ProductService;
 
 @Service
 public class OrderService {
@@ -87,11 +89,41 @@ public class OrderService {
                 .toList();
     }
 
+    public List<OrderReportDTO> getOrderReportData() {
+        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(OrderReportDTO::new)
+                .toList();
+    }
+
     public List<OrderResponseDTO> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
         return orders.stream()
                 .map(order -> new OrderResponseDTO(order, getProduct(order.getProductId())))
+                .toList();
+    }
+
+    public List<OrderResponseDTO> getOrdersByVendor(String vendorName) {
+        if (vendorName == null || vendorName.isBlank()) {
+            throw new BadRequestException("Vendor name is required");
+        }
+
+        String normalizedVendorName = vendorName.trim().toLowerCase();
+
+        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(order -> {
+                    try {
+                        ProductDTO product = getProduct(order.getProductId());
+                        if (product.getVendor() == null ||
+                                !product.getVendor().trim().toLowerCase().equals(normalizedVendorName)) {
+                            return null;
+                        }
+                        return new OrderResponseDTO(order, product);
+                    } catch (BadRequestException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .toList();
     }
 

@@ -2,6 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Store, Package } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getAllProfiles, ProfileDTO } from "@/lib/profileApi";
 import { useProductWorkflow } from "@/contexts/ProductWorkflowContext";
 
@@ -15,7 +22,10 @@ interface Vendor {
 
 const VendorsPage = () => {
   const [vendorsList, setVendorsList] = useState<Vendor[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const { products } = useProductWorkflow();
+
+  const normalize = (value: string) => value.trim().toLowerCase();
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -47,10 +57,26 @@ const VendorsPage = () => {
     return vendorsList.map((vendor) => ({
       ...vendor,
       productsCount: products.filter(
-        (p) => p.vendor === vendor.name
+        (p) => normalize(p.vendor) === normalize(vendor.name)
       ).length,
     }));
   }, [vendorsList, products]);
+
+  const selectedVendorProducts = useMemo(() => {
+    if (!selectedVendor) {
+      return [];
+    }
+
+    return products.filter((product) => normalize(product.vendor) === normalize(selectedVendor.name));
+  }, [products, selectedVendor]);
+
+  const selectedVendorSummary = useMemo(() => {
+    const approved = selectedVendorProducts.filter((product) => product.status === "approved").length;
+    const pending = selectedVendorProducts.filter((product) => product.status === "pending").length;
+    const rejected = selectedVendorProducts.filter((product) => product.status === "rejected").length;
+
+    return { approved, pending, rejected };
+  }, [selectedVendorProducts]);
 
   return (
     <div>
@@ -90,7 +116,11 @@ const VendorsPage = () => {
                   </div>
                 </div>
 
-                <Button className="w-full" size="sm">
+                <Button
+                  className="w-full"
+                  size="sm"
+                  onClick={() => setSelectedVendor(vendor)}
+                >
                   View Details
                 </Button>
               </div>
@@ -98,6 +128,83 @@ const VendorsPage = () => {
           ))}
         </div>
       )}
+
+      <Dialog
+        open={selectedVendor !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedVendor(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedVendor?.name || "Vendor details"}</DialogTitle>
+            <DialogDescription>
+              Vendor activity and product catalog details.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedVendor ? (
+            <div className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Vendor ID</p>
+                  <p className="font-medium break-all">{selectedVendor.id}</p>
+                </div>
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Joined</p>
+                  <p className="font-medium">{new Date(selectedVendor.createdAt).toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Total products</p>
+                  <p className="font-medium">{selectedVendorProducts.length}</p>
+                </div>
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Status</p>
+                  <p className="font-medium capitalize">{selectedVendor.status}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Approved</p>
+                  <p className="font-semibold">{selectedVendorSummary.approved}</p>
+                </div>
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Pending</p>
+                  <p className="font-semibold">{selectedVendorSummary.pending}</p>
+                </div>
+                <div className="rounded-xl border p-3">
+                  <p className="text-muted-foreground">Rejected</p>
+                  <p className="font-semibold">{selectedVendorSummary.rejected}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold">Products</h4>
+                {selectedVendorProducts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No products found for this vendor.</p>
+                ) : (
+                  <div className="max-h-56 overflow-y-auto rounded-xl border">
+                    {selectedVendorProducts.map((product) => (
+                      <div key={product.id} className="flex items-center justify-between gap-2 border-b last:border-b-0 p-3 text-sm">
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {product.category} • stock {product.stock}
+                          </p>
+                        </div>
+                        <Badge className="capitalize">{product.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

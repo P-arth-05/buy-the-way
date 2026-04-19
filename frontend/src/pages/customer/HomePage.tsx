@@ -10,6 +10,8 @@ import { getApprovedProducts, ProductDTO } from "@/lib/productApi";
 
 type HomeProduct = Omit<ProductDTO, "id"> & { id: string };
 
+const normalizeText = (value: unknown) => String(value ?? "").trim().toLowerCase();
+
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ export default function HomePage() {
   const searchQuery = (searchParams.get("search") || "").toLowerCase();
 
   const [products, setProducts] = useState<HomeProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([5000]);
   const [minRating, setMinRating] = useState(0);
@@ -24,32 +28,43 @@ export default function HomePage() {
 
   useEffect(() => {
     const loadProducts = async () => {
+      setLoading(true);
+      setLoadError("");
+
       try {
         const response = await getApprovedProducts();
         setProducts(
-          response.data.map((product) => ({
+          (response.data || []).map((product) => ({
             ...product,
             id: String(product.id ?? ""),
+            name: String(product.name ?? ""),
+            description: String(product.description ?? ""),
+            category: String(product.category ?? ""),
+            vendor: String(product.vendor ?? ""),
+            image: String(product.image ?? ""),
           }))
         );
       } catch (error) {
         console.error("Failed to load approved products", error);
+        setLoadError("Unable to load products right now.");
+      } finally {
+        setLoading(false);
       }
     };
 
     void loadProducts();
   }, []);
 
-  const brands = useMemo(() => Array.from(new Set(products.map((product) => product.vendor))), [products]);
+  const brands = useMemo(() => Array.from(new Set(products.map((product) => product.vendor).filter(Boolean))), [products]);
   const categories = useMemo(
-    () => ["All", ...Array.from(new Set(products.map((product) => product.category)))],
+    () => ["All", ...Array.from(new Set(products.map((product) => product.category).filter(Boolean)))],
     [products]
   );
 
   const displayedProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery) || product.description.toLowerCase().includes(searchQuery);
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    const matchesBrand = selectedBrand === "All" || product.vendor === selectedBrand;
+    const matchesSearch = normalizeText(product.name).includes(searchQuery) || normalizeText(product.description).includes(searchQuery);
+    const matchesCategory = selectedCategory === "All" || normalizeText(product.category) === normalizeText(selectedCategory);
+    const matchesBrand = selectedBrand === "All" || normalizeText(product.vendor) === normalizeText(selectedBrand);
     const matchesPrice = product.price <= priceRange[0];
     const matchesRating = (product.rating || 0) >= minRating;
 
@@ -61,6 +76,12 @@ export default function HomePage() {
       {searchQuery && (
         <h2 className="text-2xl font-bold mb-6">Search results for "{searchQuery}"</h2>
       )}
+
+      {loadError ? (
+        <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {loadError}
+        </div>
+      ) : null}
 
       <div className="flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-64 shrink-0 space-y-6">
@@ -112,14 +133,18 @@ export default function HomePage() {
         </aside>
 
         <div className="flex-1">
-          {displayedProducts.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-20 border rounded-lg bg-muted/10">
+              <h2 className="text-2xl font-semibold mb-2">Loading products...</h2>
+            </div>
+          ) : displayedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {displayedProducts.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
           ) : (
             <div className="text-center py-20 border rounded-lg bg-muted/10">
               <h2 className="text-2xl font-semibold mb-2">No products found</h2>
-              <Button variant="outline" className="mt-4" onClick={() => { setSelectedCategory("All"); setSelectedBrand("All"); setPriceRange([5000]); setMinRating(0); navigate('/'); }}>Clear Filters</Button>
+              <Button variant="outline" className="mt-4" onClick={() => { setSelectedCategory("All"); setSelectedBrand("All"); setPriceRange([5000]); setMinRating(0); navigate('/shop'); }}>Clear Filters</Button>
             </div>
           )}
         </div>

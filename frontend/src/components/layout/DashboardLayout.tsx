@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, BarChart3, User, ChevronLeft, Tag, Gift, Store, Truck } from "lucide-react";
 import { cn } from "@/lib/com.buytheway.common.utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -31,6 +31,7 @@ const vendorLinks = [
   { label: "Add Product", icon: Package, to: "/vendor/add-product" },
   { label: "Products", icon: ShoppingBag, to: "/vendor/products" },
   { label: "Inventory", icon: BarChart3, to: "/vendor/inventory" },
+  { label: "Order Tracking", icon: Truck, to: "/vendor/order-tracking" },
 ];
 
 const adminLinks = [
@@ -39,6 +40,7 @@ const adminLinks = [
   { label: "Vendors", icon: Store, to: "/admin/vendors" },
   { label: "Manage Categories", icon: Tag, to: "/admin/categories" },
   { label: "Reports", icon: BarChart3, to: "/admin/reports" },
+  { label: "Promo Codes", icon: Gift, to: "/admin/discounts" },
 ];
 
 const DashboardLayout = ({ role }: DashboardLayoutProps) => {

@@ -1,20 +1,30 @@
 package com.buytheway.modules.order.controller;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-
-import jakarta.validation.Valid;
-
-import java.util.List;
 import java.util.Base64;
+import java.util.List;
 
-import com.buytheway.modules.order.service.OrderService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.buytheway.common.response.ApiResponse;
 import com.buytheway.modules.notification.EmailService;
 import com.buytheway.modules.order.dto.OrderDTO;
+import com.buytheway.modules.order.dto.OrderReportDTO;
 import com.buytheway.modules.order.dto.OrderResponseDTO;
 import com.buytheway.modules.order.entity.Order;
 import com.buytheway.modules.order.entity.OrderStatus;
-import com.buytheway.common.response.ApiResponse;
+import com.buytheway.modules.order.service.OrderService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -67,6 +77,13 @@ public class OrderController {
         );
     }
 
+    @GetMapping("/reports")
+    public ResponseEntity<ApiResponse<List<OrderReportDTO>>> getOrderReportData() {
+        return ResponseEntity.ok(
+                new ApiResponse<>("Order report data fetched successfully", orderService.getOrderReportData())
+        );
+    }
+
     @GetMapping("/user")
     public ResponseEntity<List<OrderResponseDTO>> getMyOrders(
             @RequestHeader("Authorization") String authHeader
@@ -74,6 +91,15 @@ public class OrderController {
         String userId = extractUserId(authHeader);
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));
     }
+
+        @GetMapping("/vendor/{vendorName}")
+        public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getOrdersByVendor(
+            @PathVariable String vendorName
+        ) {
+        return ResponseEntity.ok(
+            new ApiResponse<>("Vendor orders fetched successfully", orderService.getOrdersByVendor(vendorName))
+        );
+        }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {

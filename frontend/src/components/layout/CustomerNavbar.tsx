@@ -13,7 +13,8 @@ export default function CustomerNavbar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+    navigate(query ? `/shop?search=${encodeURIComponent(query)}` : "/shop");
   };
 
   return (

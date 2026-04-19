@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ManagedProduct, useProductWorkflow } from "@/contexts/ProductWorkflowContext";
 import { useVendor } from "@/contexts/VendorContext";
 import { cn } from "@/lib/com.buytheway.common.utils";
@@ -16,11 +17,34 @@ const VendorProductsPage = () => {
   const { vendor } = useVendor();
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [draftDescription, setDraftDescription] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const vendorProducts = useMemo(
     () => products.filter((p) => p.vendor === vendor?.name),
     [products, vendor?.name]
   );
+
+  const filteredVendorProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return vendorProducts;
+    }
+
+    return vendorProducts.filter((product) => {
+      const searchableText = [
+        product.name,
+        product.description,
+        product.category,
+        product.status,
+        product.categoryStatus || "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(query);
+    });
+  }, [searchQuery, vendorProducts]);
 
   const startEditing = (product: ManagedProduct) => {
     setEditingProductId(product.id);
@@ -53,6 +77,18 @@ const VendorProductsPage = () => {
   return (
     <div>
       <h2 className="text-xl font-bold mb-6">Your Products</h2>
+      <div className="mb-4">
+        <Input
+          type="search"
+          placeholder="Search products by name, description, category, or status..."
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          className="max-w-xl"
+        />
+        <p className="mt-2 text-xs text-muted-foreground">
+          Showing {filteredVendorProducts.length} of {vendorProducts.length} products
+        </p>
+      </div>
       <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -66,7 +102,7 @@ const VendorProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {vendorProducts.map((p) => {
+            {filteredVendorProducts.map((p) => {
               const isEditing = editingProductId === p.id;
 
               return (
@@ -114,6 +150,12 @@ const VendorProductsPage = () => {
             })}
           </tbody>
         </table>
+
+        {filteredVendorProducts.length === 0 && vendorProducts.length > 0 && (
+          <div className="p-6 text-center text-muted-foreground">
+            No products match your search.
+          </div>
+        )}
       </div>
     </div>
   );
