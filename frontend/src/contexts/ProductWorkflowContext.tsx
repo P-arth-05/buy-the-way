@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { CATEGORIES } from "@/data/mockData";
+// import { CATEGORIES } from "@/data/mockData";
 import {
   approveProduct,
   createProduct,
@@ -60,10 +60,6 @@ const ProductWorkflowContext = createContext<ProductWorkflowContextType | undefi
 const normalizeText = (value: string) => value.trim().toLowerCase();
 
 const mapApiProduct = (product: ProductDTO): ManagedProduct => {
-  const categoryExists = CATEGORIES.filter((category) => category !== "All").some(
-    (category) => normalizeText(category) === normalizeText(product.category)
-  );
-
   return {
     id: String(product.id ?? ""),
     name: product.name,
@@ -76,7 +72,7 @@ const mapApiProduct = (product: ProductDTO): ManagedProduct => {
     vendor: product.vendor,
     rating: product.rating,
     reviews: product.reviews,
-    categoryStatus: categoryExists ? "approved" : product.status === "pending" ? "pending" : "approved",
+    categoryStatus: "approved", // simple default
   };
 };
 
@@ -95,9 +91,21 @@ const mapManagedProductToPayload = (product: ManagedProduct): Omit<ProductDTO, "
 
 export const ProductWorkflowProvider = ({ children }: { children: React.ReactNode }) => {
   const [products, setProducts] = useState<ManagedProduct[]>([]);
-  const [categories, setCategories] = useState<string[]>(CATEGORIES.filter((category) => category !== "All"));
+  const [categories, setCategories] = useState<string[]>([]);
   const [categoryRequests, setCategoryRequests] = useState<CategoryRequest[]>([]);
 
+  useEffect(() => {
+  const uniqueCategories = Array.from(
+    new Set(
+      products
+        .map((p) => p.category?.trim())
+        .filter(Boolean)
+    )
+  );
+
+  setCategories(uniqueCategories);
+}, [products]);
+  
   useEffect(() => {
     const loadProducts = async () => {
       try {

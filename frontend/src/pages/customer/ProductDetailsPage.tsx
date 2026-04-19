@@ -1,18 +1,54 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MOCK_PRODUCTS } from "@/data/mockData";
+import { useEffect, useState } from "react";
+import { getProductById, ProductDTO } from "@/lib/productApi";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, ArrowLeft, Store } from "lucide-react";
 import { toast } from "sonner";
 
+type Product = ProductDTO & { id: string };
+
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  //Fetch product from backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+
+      try {
+        const response = await getProductById(Number(id));
+
+        setProduct({
+          ...response.data,
+          id: String(response.data.id),
+        });
+      } catch (error) {
+        console.error("Failed to load product", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-xl font-medium">Loading product...</h2>
+      </div>
+    );
+  }
+
+  // If product not found
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -29,10 +65,10 @@ export default function ProductDetailsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <Button 
-        variant="ghost" 
-        className="mb-6 gap-2" 
-        onClick={() => navigate("/")}
+      <Button
+        variant="ghost"
+        className="mb-6 gap-2"
+        onClick={() => navigate("/shop")}
       >
         <ArrowLeft className="h-4 w-4" /> Back to Products
       </Button>
@@ -54,10 +90,15 @@ export default function ProductDetailsPage() {
                 <Store className="h-4 w-4" /> {product.vendor}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
+
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              {product.name}
+            </h1>
+
             <p className="text-3xl font-bold text-primary mb-6">
               ₹{product.price.toFixed(2)}
             </p>
+
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               {product.description}
             </p>
@@ -67,16 +108,20 @@ export default function ProductDetailsPage() {
             <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
               <span className="font-medium">Availability</span>
               {product.stock > 0 ? (
-                <span className="text-green-600 font-medium">{product.stock} in stock</span>
+                <span className="text-green-600 font-medium">
+                  {product.stock} in stock
+                </span>
               ) : (
-                <span className="text-destructive font-medium">Out of stock</span>
+                <span className="text-destructive font-medium">
+                  Out of stock
+                </span>
               )}
             </div>
           </div>
 
           <div className="mt-auto">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full text-lg h-14 gap-2"
               onClick={handleAddToCart}
               disabled={product.stock === 0}
