@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
 import { ProductWorkflowProvider } from "@/contexts/ProductWorkflowContext";
+import { AuthProvider } from "@/contexts/AuthContext";          // ← ADD
+import ProtectedRoute from "@/components/ProtectedRoute";      // ← ADD
 import CustomerLayout from "@/components/layout/CustomerLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomePage from "@/pages/customer/HomePage";
@@ -24,7 +26,6 @@ import DiscountsPage from "@/pages/admin/DiscountsPage";
 import CategoriesPage from "@/pages/admin/CategoriesPage";
 import VendorsPage from "@/pages/admin/VendorsPage";
 import NotFound from "@/pages/NotFound";
-// Add this near your other customer page imports
 import OrderHistoryPage from "@/pages/customer/OrderHistoryPage";
 import AboutPage from "@/pages/customer/AboutPage";
 import ProfilePage from "@/pages/customer/ProfilePage";
@@ -32,7 +33,7 @@ import FAQPage from "@/pages/customer/FAQPage";
 import ReturnsPage from "@/pages/customer/ReturnsPage";
 import TermsPage from "@/pages/customer/TermsPage";
 import PrivacyPage from "@/pages/customer/PrivacyPage";
-import Landing from "@/pages/LandingPage/Landing"; 
+import Landing from "@/pages/LandingPage/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/CustomerRegister";
 import VendorRegister from "@/pages/VendorRegister";
@@ -47,29 +48,35 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/vendor-register" element={<VendorRegister />} />
+            <AuthProvider>  {/* ← MOVED inside BrowserRouter (needed for useNavigate) */}
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Landing />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/vendor-register" element={<VendorRegister />} />
 
-            {/* Customer routes */}
-            <Route element={<CustomerLayout />}>
-              <Route path="/shop" element={<HomePage />} />
-              <Route path="/product/:id" element={<ProductDetailsPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/order-tracking" element={<OrderTrackingPage />} />
-              <Route path="/order-history" element={<OrderHistoryPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="/returns" element={<ReturnsPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-            </Route>
+                {/* Customer routes — customers + guests can access */}
+                <Route element={
+                  <ProtectedRoute allowedRoles={["customer"]}>
+                    <CustomerLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route path="/shop" element={<HomePage />} />
+                  <Route path="/product/:id" element={<ProductDetailsPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/order-tracking" element={<OrderTrackingPage />} />
+                  <Route path="/order-history" element={<OrderHistoryPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                </Route>
 
+<<<<<<< HEAD
             {/* Vendor routes */}
             <Route element={<DashboardLayout role="vendor" />}>
               <Route path="/vendor" element={<VendorDashboard />} />
@@ -88,9 +95,36 @@ const App = () => (
               <Route path="/admin/categories" element={<CategoriesPage />} />
               <Route path="/admin/vendors" element={<VendorsPage />} />
             </Route>
+=======
+                {/* Vendor routes */}
+                <Route element={
+                  <ProtectedRoute allowedRoles={["vendor"]}>
+                    <DashboardLayout role="vendor" />
+                  </ProtectedRoute>
+                }>
+                  <Route path="/vendor" element={<VendorDashboard />} />
+                  <Route path="/vendor/add-product" element={<AddProductPage />} />
+                  <Route path="/vendor/products" element={<VendorProductsPage />} />
+                  <Route path="/vendor/inventory" element={<InventoryPage />} />
+                </Route>
 
-            <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Admin routes */}
+                <Route element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <DashboardLayout role="admin" />
+                  </ProtectedRoute>
+                }>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/approvals" element={<ApprovalsPage />} />
+                  <Route path="/admin/reports" element={<ReportsPage />} />
+                  <Route path="/admin/categories" element={<CategoriesPage />} />
+                  <Route path="/admin/vendors" element={<VendorsPage />} />
+                </Route>
+>>>>>>> rollback-branch
+
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
           </BrowserRouter>
         </ProductWorkflowProvider>
       </CartProvider>

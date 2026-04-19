@@ -21,55 +21,16 @@ export default function Login() {
         setLoading(true);
         setErrorMsg("");
 
-        // 1. Authenticate with Supabase
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
         });
 
         if (error) {
         setErrorMsg(error.message);
-        return;
         }
 
-        // 2. Safely extract user + session
-        const userId = data?.user?.id;
-        const accessToken = data?.session?.access_token;
-
-        if (!userId || !accessToken) {
-        setErrorMsg("Login failed: missing session data");
-        return;
-        }
-
-        // 3. Store token for backend usage
-        localStorage.setItem("access_token", accessToken);
-
-        // (optional) store user id
-        localStorage.setItem("user_id", userId);
-
-        // 4. Fetch role from profiles table
-        const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
-
-        if (profileError) {
-        console.error(profileError);
-        setErrorMsg("Failed to fetch user profile");
-        return;
-        }
-
-        // 5. Role-based navigation (unchanged logic)
-        if (profile?.role === "customer") {
-        navigate("/shop");
-        } else if (profile?.role === "vendor") {
-        navigate("/vendor");
-        } else if (profile?.role === "admin") {
-        navigate("/admin");
-        } else {
-        setErrorMsg("Unknown user role");
-        }
+        // ✅ No navigation here — AuthContext handles it
 
     } catch (err) {
         console.error(err);
@@ -105,8 +66,8 @@ export default function Login() {
             <Input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             <Input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
 
-            <Button onClick={handleLogin} className="w-full rounded-full py-6 text-lg">
-                Login
+            <Button onClick={handleLogin} className="w-full rounded-full py-6 text-lg disabled={loading} ">
+                {loading ? (<span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Logging in...</span>) : ("Login")}
             </Button>
             </div>
 

@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { getMyOrders, cancelOrder, returnOrder } from "@/lib/orderApi";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -41,6 +43,13 @@ export default function OrderHistoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <button
+        onClick={() => navigate("/shop")}
+        className="flex items-center gap-1 text-sm text-gray-600 hover:text-black mb-4"
+      >
+        <span className="text-lg">←</span>
+        Back to shop
+      </button>
       <h1 className="text-3xl font-bold mb-6">My Orders</h1>
 
       {orders.length === 0 ? (

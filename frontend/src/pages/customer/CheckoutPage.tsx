@@ -185,6 +185,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
+      <button
+        onClick={() => navigate("/shop")}
+        className="flex items-center gap-1 text-sm text-gray-600 hover:text-black mb-4"
+      >
+        <span className="text-lg">←</span>
+        Back to shop
+      </button>
       <h1 className="text-3xl font-semibold mb-8 text-center">Checkout</h1>
 
       <div className="grid md:grid-cols-3 gap-6">

@@ -24,6 +24,13 @@ export default function CartPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <button
+        onClick={() => navigate("/shop")}
+        className="flex items-center gap-1 text-sm text-gray-600 hover:text-black mb-4"
+      >
+        <span className="text-lg">←</span>
+        Back to shop
+      </button>
       <h1 className="text-2xl mb-6">Cart</h1>
 
       {items.map((item) => (
