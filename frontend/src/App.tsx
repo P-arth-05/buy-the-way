@@ -47,7 +47,6 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TooltipProvider>
-          {/* ✅ CartProvider MUST wrap EVERYTHING once */}
           <CartProvider>
             <ProductWorkflowProvider>
               <Toaster />
