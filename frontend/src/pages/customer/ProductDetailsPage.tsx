@@ -3,13 +3,13 @@ import { MOCK_PRODUCTS } from "@/data/mockData";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, ArrowLeft, Store } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, Store } from "lucide-react";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+
+  const { addToCart, decreaseQty, getItemQty } = useCart();
 
   const product = MOCK_PRODUCTS.find((p) => p.id === id);
 
@@ -22,16 +22,13 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const handleAddToCart = () => {
-    addToCart(product);
-    toast.success(`${product.name} added to cart!`);
-  };
+  const cartQty = getItemQty(product.id);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <Button 
-        variant="ghost" 
-        className="mb-6 gap-2" 
+      <Button
+        variant="ghost"
+        className="mb-6 gap-2"
         onClick={() => navigate("/")}
       >
         <ArrowLeft className="h-4 w-4" /> Back to Products
@@ -54,36 +51,55 @@ export default function ProductDetailsPage() {
                 <Store className="h-4 w-4" /> {product.vendor}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
+
+            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+
             <p className="text-3xl font-bold text-primary mb-6">
               ₹{product.price.toFixed(2)}
             </p>
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+
+            <p className="text-lg text-muted-foreground mb-8">
               {product.description}
             </p>
           </div>
 
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-              <span className="font-medium">Availability</span>
-              {product.stock > 0 ? (
-                <span className="text-green-600 font-medium">{product.stock} in stock</span>
-              ) : (
-                <span className="text-destructive font-medium">Out of stock</span>
-              )}
-            </div>
-          </div>
-
+          {/* ✅ DYNAMIC CART UI */}
           <div className="mt-auto">
-            <Button 
-              size="lg" 
-              className="w-full text-lg h-14 gap-2"
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-            </Button>
+            {cartQty === 0 ? (
+              <Button
+                size="lg"
+                className="w-full h-14"
+                onClick={() => addToCart(product)}
+              >
+                Add to Cart
+              </Button>
+            ) : (
+              <div className="flex items-center gap-4">
+                {/* QUANTITY */}
+                <div className="flex items-center border rounded-full px-4 py-2 gap-4">
+                  <button
+                    onClick={() => decreaseQty(product.id)}
+                    className="text-xl"
+                  >
+                    -
+                  </button>
+
+                  <span className="text-lg">{cartQty}</span>
+
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="text-xl"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* GO TO CART */}
+                <Button onClick={() => navigate("/cart")}>
+                  Go to Cart
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
