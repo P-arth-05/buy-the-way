@@ -21,6 +21,7 @@ import InventoryPage from "@/pages/vendor/InventoryPage";
 import VendorOrderTrackingPage from "@/pages/vendor/VendorOrderTrackingPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ApprovalsPage from "@/pages/admin/ApprovalsPage";
+import ProductsPage from "@/pages/admin/ProductsPage";
 import ReportsPage from "@/pages/admin/ReportsPage";
 import DiscountsPage from "@/pages/admin/DiscountsPage";
 import CategoriesPage from "@/pages/admin/CategoriesPage";
@@ -96,6 +97,7 @@ const App = () => (
                 }>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/approvals" element={<ApprovalsPage />} />
+                  <Route path="/admin/products" element={<ProductsPage />} />
                   <Route path="/admin/reports" element={<ReportsPage />} />
                   <Route path="/admin/categories" element={<CategoriesPage />} />
                   <Route path="/admin/vendors" element={<VendorsPage />} />

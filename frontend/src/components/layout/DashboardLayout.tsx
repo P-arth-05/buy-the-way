@@ -37,6 +37,7 @@ const vendorLinks = [
 const adminLinks = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
   { label: "Approvals", icon: Package, to: "/admin/approvals" },
+  { label: "Products", icon: ShoppingBag, to: "/admin/products" },
   { label: "Vendors", icon: Store, to: "/admin/vendors" },
   { label: "Manage Categories", icon: Tag, to: "/admin/categories" },
   { label: "Reports", icon: BarChart3, to: "/admin/reports" },
@@ -153,43 +154,46 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-40">
           <h1 className="text-lg font-semibold">{links.find(l => l.to === location.pathname)?.label || title}</h1>
-          {role === "vendor" && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Vendor Profile</DialogTitle>
-                  <DialogDescription>Profile details for the current vendor account.</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Name</span>
-                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.name || "-"}</span>
+          <div className="flex items-center gap-2">
+            {role === "vendor" && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Vendor Profile</DialogTitle>
+                    <DialogDescription>Profile details for the current vendor account.</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <span className="text-muted-foreground">Name</span>
+                      <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.name || "-"}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <span className="text-muted-foreground">Email</span>
+                      <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.email || "-"}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <span className="text-muted-foreground">Role</span>
+                      <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.role || "-"}</span>
+                    </div>
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <span className="text-muted-foreground">User ID</span>
+                      <span className="font-medium truncate max-w-[220px] text-right">{loadingProfile ? "Loading..." : vendorProfile?.userId || "-"}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Member Since</span>
+                      <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.memberSince || "-"}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Email</span>
-                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.email || "-"}</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Role</span>
-                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.role || "-"}</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground">User ID</span>
-                    <span className="font-medium truncate max-w-[220px] text-right">{loadingProfile ? "Loading..." : vendorProfile?.userId || "-"}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Member Since</span>
-                    <span className="font-medium">{loadingProfile ? "Loading..." : vendorProfile?.memberSince || "-"}</span>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+                </DialogContent>
+              </Dialog>
+            )}
+            <Button variant="outline" size="sm">Logout</Button>
+          </div>
         </header>
         <main className="flex-1 p-8">
           <Outlet />
