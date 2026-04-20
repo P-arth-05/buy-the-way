@@ -3,10 +3,13 @@ package com.buytheway.modules.order.service;
 import java.util.List;
 import java.util.Objects;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.buytheway.common.exception.BadRequestException;
+import com.buytheway.modules.notification.EmailService;
 import com.buytheway.modules.order.dto.OrderDTO;
 import com.buytheway.modules.order.dto.OrderReportDTO;
 import com.buytheway.modules.order.dto.OrderResponseDTO;
@@ -15,19 +18,27 @@ import com.buytheway.modules.order.entity.OrderStatus;
 import com.buytheway.modules.order.repository.OrderRepository;
 import com.buytheway.modules.product.dto.ProductDTO;
 import com.buytheway.modules.product.service.ProductService;
+import com.buytheway.modules.user.entity.User;
+import com.buytheway.modules.user.repository.UserRepository;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductService productService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     private static final int MAX_QTY = 5;
 
     public OrderService(OrderRepository orderRepository,
-                        ProductService productService) {
+                        ProductService productService,
+                        UserRepository userRepository,
+                        EmailService emailService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -73,6 +84,18 @@ public class OrderService {
 
         product.setStock(product.getStock() - dto.getQuantity());
         productService.updateProduct(product.getId(), product);
+
+        if (product.getStock() < 10) {
+            Optional<User> vendorUser = userRepository.findByNameIgnoreCase(product.getVendor());
+            vendorUser.ifPresent(user ->
+                    emailService.sendLowStockAlert(
+                            user.getEmail(),
+                            product.getVendor(),
+                            product.getName(),
+                            product.getStock()
+                    )
+            );
+        }
 
         return savedOrder;
     }

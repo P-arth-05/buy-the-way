@@ -8,5 +8,6 @@ import com.buytheway.modules.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByNameIgnoreCase(String name);
     boolean existsByEmailIgnoreCase(String email);
 }

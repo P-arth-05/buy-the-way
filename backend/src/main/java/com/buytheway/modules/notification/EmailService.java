@@ -32,7 +32,22 @@ public class EmailService {
         message.setText(
                 "Your order #" + orderId + " has been updated.\n\n" +
                 "New Status: " + status + "\n\n" +
-                "You can track it in your account.Thank you for shopping with BuyTheWay!"
+                "You can track it in your account. Thank you for shopping with BuyTheWay!"
+        );
+        mailSender.send(message);
+    }
+
+    public void sendLowStockAlert(String to, String vendorName, String productName, int stockRemaining) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Low Stock Alert - BuyTheWay");
+        message.setText(
+                "Hello " + vendorName + ",\n\n" +
+                "Your product \"" + productName + "\" is running low on stock.\n" +
+                "Current stock remaining: " + stockRemaining + " units.\n\n" +
+                "Please restock soon.\n\n" +
+                "Thank you,\n" +
+                "BuyTheWay Team"
         );
         mailSender.send(message);
     }
