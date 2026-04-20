@@ -43,15 +43,16 @@ import VendorRegister from "@/pages/VendorRegister";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CartProvider>
-        <ProductWorkflowProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>  {/* ← MOVED inside BrowserRouter (needed for useNavigate) */}
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          <CartProvider>
+            <ProductWorkflowProvider>
+              <Toaster />
+              <Sonner />
+
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Landing />} />
