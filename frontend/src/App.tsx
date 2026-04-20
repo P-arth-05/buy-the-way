@@ -3,12 +3,14 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import { CartProvider } from "@/contexts/CartContext";
 import { ProductWorkflowProvider } from "@/contexts/ProductWorkflowContext";
 import { AuthProvider } from "@/contexts/AuthContext";          // ← ADD
 import ProtectedRoute from "@/components/ProtectedRoute";      // ← ADD
 import CustomerLayout from "@/components/layout/CustomerLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+
 import HomePage from "@/pages/customer/HomePage";
 import ProductDetailsPage from "@/pages/customer/ProductDetailsPage";
 import CartPage from "@/pages/customer/CartPage";

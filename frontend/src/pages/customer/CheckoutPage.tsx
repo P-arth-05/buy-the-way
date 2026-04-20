@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { createOrder } from "@/lib/orderApi";
 import { toast } from "sonner";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://azmnrmazqsbrzlukovrs.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6bW5ybWF6cXNicnpsdWtvdnJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NzM5OTIsImV4cCI6MjA5MDQ0OTk5Mn0.RSNfMS7asiZ0ALs2S3YJG38txl6T2CoBE6fQZ45wu9Q"
+);
 
 type CheckoutFormValues = {
   fullName: string;
@@ -37,14 +43,71 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // ── Promo code state ──────────────────────────────────────────
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<number | null>(null); // percentage e.g. 15
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  // ─────────────────────────────────────────────────────────────
+
+  const discountedTotal =
+    appliedDiscount !== null
+      ? Math.round(total * (1 - appliedDiscount / 100))
+      : total;
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
-
     setForm({ ...form, [name]: value });
-
-    // 🔥 Remove error as user types (good UX)
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
+
+  // ── Apply promo code ──────────────────────────────────────────
+  const handleApplyPromo = async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
+      toast.error("Please enter a promo code.");
+      return;
+    }
+
+    setPromoLoading(true);
+    try {
+      const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      const { data, error } = await supabase
+        .from("discounts")
+        .select("code, percentage, start_date, end_date")
+        .eq("code", code)
+        .single();
+
+      if (error || !data) {
+        toast.error("Invalid promo code.");
+        setAppliedDiscount(null);
+        setAppliedPromoCode(null);
+        return;
+      }
+
+      if (today < data.start_date || today > data.end_date) {
+        toast.error("This promo code has expired or is not yet active.");
+        setAppliedDiscount(null);
+        setAppliedPromoCode(null);
+        return;
+      }
+
+      setAppliedDiscount(data.percentage);
+      setAppliedPromoCode(data.code);
+      toast.success(`Promo applied! ${data.percentage}% off`);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedDiscount(null);
+    setAppliedPromoCode(null);
+    setPromoCode("");
+    toast.info("Promo code removed.");
+  };
+  // ─────────────────────────────────────────────────────────────
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
@@ -88,13 +151,12 @@ export default function CheckoutPage() {
       setIsProcessing(true);
 
       const MAX_QTY = 5;
-      if (items.some(item => item.quantity > MAX_QTY)) {
+      if (items.some((item) => item.quantity > MAX_QTY)) {
         toast.error(`Max ${MAX_QTY} items allowed`);
         return;
       }
 
       const isValid = validateForm();
-
       if (!isValid) {
         toast.error("Please provide valid details");
         return;
@@ -111,7 +173,7 @@ export default function CheckoutPage() {
             address: form.address,
             city: form.city,
             pincode: form.pincode,
-      });
+          });
         }
 
         toast.success("Order placed");
@@ -120,8 +182,8 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Razorpay (unchanged)
-      const amount = total * 100;
+      // Razorpay — use discountedTotal
+      const amount = discountedTotal * 100;
 
       const res = await fetch(
         "http://localhost:8080/api/payments/create-razorpay-order",
@@ -167,7 +229,6 @@ export default function CheckoutPage() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
-
     } catch {
       toast.error("Something went wrong");
     } finally {
@@ -177,9 +238,11 @@ export default function CheckoutPage() {
 
   const inputStyle = (field: keyof FormErrors) =>
     `w-full p-3 border rounded-md outline-none transition
-    ${errors[field]
-      ? "border-red-500 bg-red-50"
-      : "border-gray-300 focus:ring-2 focus:ring-gray-900"}`;
+    ${
+      errors[field]
+        ? "border-red-500 bg-red-50"
+        : "border-gray-300 focus:ring-2 focus:ring-gray-900"
+    }`;
 
   const errorText = "text-sm text-red-500 mt-1";
 
@@ -195,10 +258,8 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-semibold mb-8 text-center">Checkout</h1>
 
       <div className="grid md:grid-cols-3 gap-6">
-
         {/* LEFT */}
         <div className="md:col-span-2 space-y-6">
-
           <div className="bg-white p-6 rounded-xl shadow space-y-4">
             <h2 className="font-semibold mb-4">Shipping</h2>
 
@@ -248,7 +309,43 @@ export default function CheckoutPage() {
             {errors.pincode && <p className={errorText}>{errors.pincode}</p>}
           </div>
 
-          {/* PAYMENT unchanged */}
+          {/* PROMO CODE */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="font-semibold mb-4">Promo Code</h2>
+
+            {appliedPromoCode ? (
+              <div className="flex items-center justify-between bg-green-50 border border-green-300 rounded-md px-4 py-3">
+                <span className="text-green-700 font-medium">
+                  {appliedPromoCode} — {appliedDiscount}% off applied!
+                </span>
+                <button
+                  onClick={handleRemovePromo}
+                  className="text-sm text-red-500 hover:text-red-700 ml-4"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <input
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="flex-1 p-3 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-gray-900"
+                  onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                />
+                <button
+                  onClick={handleApplyPromo}
+                  disabled={promoLoading}
+                  className="bg-gray-900 text-white px-5 py-3 rounded-md disabled:opacity-50"
+                >
+                  {promoLoading ? "Checking..." : "Apply"}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* PAYMENT */}
           <div className="bg-white p-6 rounded-xl shadow">
             <h2 className="font-semibold mb-4">Payment</h2>
 
@@ -276,15 +373,31 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="bg-white p-6 rounded-xl shadow h-fit">
-          <h2 className="font-semibold mb-4">Total</h2>
-          <p className="text-2xl font-bold mb-6">₹{total}</p>
+        {/* RIGHT — Order Summary */}
+        <div className="bg-white p-6 rounded-xl shadow h-fit space-y-3">
+          <h2 className="font-semibold mb-2">Order Summary</h2>
+
+          <div className="flex justify-between text-gray-600">
+            <span>Subtotal</span>
+            <span>₹{total}</span>
+          </div>
+
+          {appliedDiscount !== null && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount ({appliedDiscount}%)</span>
+              <span>− ₹{total - discountedTotal}</span>
+            </div>
+          )}
+
+          <div className="border-t pt-3 flex justify-between text-lg font-bold">
+            <span>Total</span>
+            <span>₹{discountedTotal}</span>
+          </div>
 
           <button
             onClick={onSubmit}
             disabled={isProcessing}
-            className="w-full bg-gray-900 text-white py-3 rounded-md"
+            className="w-full bg-gray-900 text-white py-3 rounded-md mt-2 disabled:opacity-50"
           >
             {isProcessing ? "Processing..." : "Place Order"}
           </button>
