@@ -76,26 +76,6 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPage />} />
                 </Route>
 
-<<<<<<< HEAD
-            {/* Vendor routes */}
-            <Route element={<DashboardLayout role="vendor" />}>
-              <Route path="/vendor" element={<VendorDashboard />} />
-              <Route path="/vendor/add-product" element={<AddProductPage />} />
-              <Route path="/vendor/products" element={<VendorProductsPage />} />
-              <Route path="/vendor/inventory" element={<InventoryPage />} />
-              <Route path="/vendor/order-tracking" element={<VendorOrderTrackingPage />} />
-            </Route>
-
-            {/* Admin routes */}
-            <Route element={<DashboardLayout role="admin" />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/approvals" element={<ApprovalsPage />} />
-              <Route path="/admin/reports" element={<ReportsPage />} />
-              <Route path="/admin/discounts" element={<DiscountsPage />} />
-              <Route path="/admin/categories" element={<CategoriesPage />} />
-              <Route path="/admin/vendors" element={<VendorsPage />} />
-            </Route>
-=======
                 {/* Vendor routes */}
                 <Route element={
                   <ProtectedRoute allowedRoles={["vendor"]}>
@@ -120,7 +100,6 @@ const App = () => (
                   <Route path="/admin/categories" element={<CategoriesPage />} />
                   <Route path="/admin/vendors" element={<VendorsPage />} />
                 </Route>
->>>>>>> rollback-branch
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
