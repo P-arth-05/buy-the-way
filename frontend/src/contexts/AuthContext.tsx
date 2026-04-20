@@ -33,7 +33,6 @@ const SUPABASE_URL = "https://azmnrmazqsbrzlukovrs.supabase.co"
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6bW5ybWF6cXNicnpsdWtvdnJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NzM5OTIsImV4cCI6MjA5MDQ0OTk5Mn0.RSNfMS7asiZ0ALs2S3YJG38txl6T2CoBE6fQZ45wu9Q"
 
 const fetchProfile = async (userId: string, accessToken: string) => {
-  console.log("1️⃣ fetchProfile called with:", userId)
 
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role,name`,
@@ -46,7 +45,6 @@ const fetchProfile = async (userId: string, accessToken: string) => {
   )
 
   const data = await response.json()
-  console.log("2️⃣ profile result:", data)
 
   if (!data || data.length === 0) {
     console.log("❌ no profile found")
@@ -66,40 +64,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log("3️⃣ AuthContext mounted")
 
     // 1. Check existing session on app load
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("4️⃣ existing session:", session?.user?.id ?? "none")
 
       if (session?.user) {
         const profile = await fetchProfile(session.user.id, session.access_token)
-        console.log("5️⃣ profile from session:", profile)
         setUser(profile)
         localStorage.setItem("access_token", session.access_token)
       }
 
       setLoading(false)
-      console.log("6️⃣ initial loading complete")
     })
 
     // 2. Listen for auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("7️⃣ auth event:", event)
 
         if (event === "SIGNED_IN" && session?.user) {
           const { id, access_token } = { id: session.user.id, access_token: session.access_token }
 
           setTimeout(async () => {
             const profile = await fetchProfile(id, access_token)
-            console.log("8️⃣ profile after login:", profile)
 
             setUser(profile)
             localStorage.setItem("access_token", access_token)
 
             if (profile?.role) {
-              console.log("9️⃣ navigating to:", ROLE_HOME[profile.role])
               navigate(ROLE_HOME[profile.role])
             } else {
               console.log("❌ no role found — cannot navigate")
