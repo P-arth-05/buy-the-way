@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useLogout } from "@/hooks/useLogout";
 
 interface DashboardLayoutProps {
   role: "vendor" | "admin";
@@ -52,6 +53,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
   const [vendorProfile, setVendorProfile] = useState<VendorProfileView | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [checking, setChecking] = useState(true);
+  const { logout } = useLogout();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -192,7 +194,9 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
                 </DialogContent>
               </Dialog>
             )}
-            <Button variant="outline" size="sm">Logout</Button>
+            <Button variant="outline" size="sm" onClick={logout}>
+              Logout
+            </Button>
           </div>
         </header>
         <main className="flex-1 p-8">
