@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-// import { CATEGORIES } from "@/data/mockData";
+import { CATEGORIES } from "@/data/mockData";
 import {
   approveProduct,
   createProduct,
@@ -7,7 +7,6 @@ import {
   ProductDTO,
   rejectProduct,
   updateProduct,
-  deleteProduct as deleteProductRequest,
 } from "@/lib/productApi";
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
@@ -54,8 +53,6 @@ interface ProductWorkflowContextType {
   updateCategoryStatus: (requestId: string, status: Exclude<ApprovalStatus, "pending">) => void;
   updateProductDescription: (productId: string, description: string) => Promise<void>;
   updateProductStock: (productId: string, stock: number) => Promise<void>;
-  updateProductPrice: (productId: string, price: number) => Promise<void>;
-  deleteProduct: (productId: string) => Promise<void>;
 }
 
 const ProductWorkflowContext = createContext<ProductWorkflowContextType | undefined>(undefined);
@@ -63,6 +60,10 @@ const ProductWorkflowContext = createContext<ProductWorkflowContextType | undefi
 const normalizeText = (value: string) => value.trim().toLowerCase();
 
 const mapApiProduct = (product: ProductDTO): ManagedProduct => {
+  const categoryExists = CATEGORIES.filter((category) => category !== "All").some(
+    (category) => normalizeText(category) === normalizeText(product.category)
+  );
+
   return {
     id: String(product.id ?? ""),
     name: product.name,
@@ -75,7 +76,7 @@ const mapApiProduct = (product: ProductDTO): ManagedProduct => {
     vendor: product.vendor,
     rating: product.rating,
     reviews: product.reviews,
-    categoryStatus: "approved", // simple default
+    categoryStatus: categoryExists ? "approved" : product.status === "pending" ? "pending" : "approved",
   };
 };
 
@@ -94,17 +95,9 @@ const mapManagedProductToPayload = (product: ManagedProduct): Omit<ProductDTO, "
 
 export const ProductWorkflowProvider = ({ children }: { children: React.ReactNode }) => {
   const [products, setProducts] = useState<ManagedProduct[]>([]);
-  const categories = useMemo(() => {
-  return Array.from(
-    new Set(
-      products
-        .map((p) => p.category?.trim())
-        .filter(Boolean)
-    )
-  );
-}, [products]);
+  const [categories, setCategories] = useState<string[]>(CATEGORIES.filter((category) => category !== "All"));
   const [categoryRequests, setCategoryRequests] = useState<CategoryRequest[]>([]);
-  
+
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -118,7 +111,18 @@ export const ProductWorkflowProvider = ({ children }: { children: React.ReactNod
     void loadProducts();
   }, []);
 
-
+  useEffect(() => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) => ({
+        ...product,
+        categoryStatus: categories.some((category) => normalizeText(category) === normalizeText(product.category))
+          ? "approved"
+          : product.status === "pending"
+          ? "pending"
+          : "approved",
+      }))
+    );
+  }, [categories]);
 
   const requestCategory = (name: string, vendor: string) => {
     const trimmedName = name.trim();
@@ -196,6 +200,13 @@ export const ProductWorkflowProvider = ({ children }: { children: React.ReactNod
 
     if (!requestName) return;
 
+    if (status === "approved") {
+      setCategories((prevCategories) => {
+        const exists = prevCategories.some((category) => normalizeText(category) === normalizeText(requestName));
+        return exists ? prevCategories : [...prevCategories, requestName];
+      });
+    }
+
     setProducts((prevProducts) =>
       prevProducts.map((product) => {
         if (normalizeText(product.category) !== normalizeText(requestName)) {
@@ -233,7 +244,7 @@ export const ProductWorkflowProvider = ({ children }: { children: React.ReactNod
   try {
     const response = await updateProduct(Number(productId), {
       ...mapManagedProductToPayload(existingProduct),
-      stock,
+      stock, 
     });
 
     const updatedProduct = mapApiProduct(response.data);
@@ -249,28 +260,6 @@ export const ProductWorkflowProvider = ({ children }: { children: React.ReactNod
   }
 };
 
-  const updateProductPrice = async (productId: string, price: number) => {
-    const existingProduct = products.find((product) => product.id === productId);
-    if (!existingProduct) return;
-
-    const response = await updateProduct(Number(productId), {
-      ...mapManagedProductToPayload(existingProduct),
-      price,
-    });
-
-    const updatedProduct = mapApiProduct(response.data);
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === productId ? updatedProduct : product
-      )
-    );
-  };
-
-  const deleteProduct = async (productId: string) => {
-    await deleteProductRequest(Number(productId));
-    setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
-  };
-
   const value = useMemo(
     () => ({
       products,
@@ -282,8 +271,6 @@ export const ProductWorkflowProvider = ({ children }: { children: React.ReactNod
       updateCategoryStatus,
       updateProductDescription,
       updateProductStock,
-      updateProductPrice,
-      deleteProduct,
     }),
     [products, categories, categoryRequests]
   );

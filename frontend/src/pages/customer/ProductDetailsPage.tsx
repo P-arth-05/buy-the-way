@@ -17,7 +17,7 @@ export default function ProductDetailsPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-        <Button onClick={() => navigate("/")}>Return to Home</Button>
+        <Button onClick={() => navigate("/shop")}>Return to shop</Button>
       </div>
     );
   }
@@ -29,7 +29,7 @@ export default function ProductDetailsPage() {
       <Button
         variant="ghost"
         className="mb-6 gap-2"
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/shop")}
       >
         <ArrowLeft className="h-4 w-4" /> Back to Products
       </Button>
