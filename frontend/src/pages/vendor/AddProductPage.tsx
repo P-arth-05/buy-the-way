@@ -98,7 +98,7 @@ const AddProductPage = () => {
         </div>
         <div>
           <Label>Image URL</Label>
-          <Input value={image} onChange={(e) => setImage(e.target.value)} placeholder="https://..." className="mt-1.5" />
+          <Input required value={image} onChange={(e) => setImage(e.target.value)} placeholder="https://..." className="mt-1.5" />
         </div>
         <div>
           <Label>Stock</Label>
