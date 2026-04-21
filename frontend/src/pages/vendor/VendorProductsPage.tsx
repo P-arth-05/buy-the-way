@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ManagedProduct, useProductWorkflow } from "@/contexts/ProductWorkflowContext";
@@ -13,10 +13,12 @@ const statusStyles = {
 } as const;
 
 const VendorProductsPage = () => {
-  const { products, updateProductDescription } = useProductWorkflow();
+  const { products, updateProductDescription, updateProductPrice } = useProductWorkflow();
   const { vendor } = useVendor();
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [draftDescription, setDraftDescription] = useState("");
+  const [editingPriceProductId, setEditingPriceProductId] = useState<string | null>(null);
+  const [draftPrice, setDraftPrice] = useState<number | string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const vendorProducts = useMemo(
@@ -74,6 +76,34 @@ const VendorProductsPage = () => {
     }
   };
 
+  const startEditingPrice = (product: ManagedProduct) => {
+    setEditingPriceProductId(product.id);
+    setDraftPrice(product.price);
+  };
+
+  const cancelEditingPrice = () => {
+    setEditingPriceProductId(null);
+    setDraftPrice("");
+  };
+
+  const savePrice = async (productId: string) => {
+    const price = parseFloat(String(draftPrice));
+    if (isNaN(price) || price < 0) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
+
+    try {
+      await updateProductPrice(productId, price);
+      setEditingPriceProductId(null);
+      setDraftPrice("");
+      toast.success("Product price updated.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to update product price.";
+      toast.error(message);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-6">Your Products</h2>
@@ -104,6 +134,7 @@ const VendorProductsPage = () => {
           <tbody>
             {filteredVendorProducts.map((p) => {
               const isEditing = editingProductId === p.id;
+              const isEditingPrice = editingPriceProductId === p.id;
 
               return (
                 <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors align-top">
@@ -134,7 +165,35 @@ const VendorProductsPage = () => {
                     )}
                   </td>
                   <td className="px-6 py-4">{p.stock}</td>
-                  <td className="px-6 py-4">₹{p.price.toFixed(2)}</td>
+                  <td className="px-6 py-4">
+                    {isEditingPrice ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">₹</span>
+                          <input
+                            type="number"
+                            value={draftPrice}
+                            onChange={(e) => setDraftPrice(e.target.value)}
+                            className="w-24 rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={() => savePrice(p.id)}>Save</Button>
+                          <Button size="sm" className="bg-background border border-input text-foreground hover:bg-muted" onClick={cancelEditingPrice}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p>₹{p.price.toFixed(2)}</p>
+                        <Button size="sm" className="bg-background border border-input text-foreground hover:bg-muted" onClick={() => startEditingPrice(p)}>
+                          Edit Price
+                        </Button>
+                      </div>
+                    )}
+                  </td>
                   <td className="px-6 py-4">
                     <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium capitalize", statusStyles[p.categoryStatus || "approved"])}>
                       {p.categoryStatus || "approved"}

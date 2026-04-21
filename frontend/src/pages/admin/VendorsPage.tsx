@@ -116,11 +116,7 @@ const VendorsPage = () => {
                   </div>
                 </div>
 
-                <Button
-                  className="w-full"
-                  size="sm"
-                  onClick={() => setSelectedVendor(vendor)}
-                >
+                <Button variant="soft" size="sm" className="w-full" onClick={() => setSelectedVendor(vendor)}>
                   View Details
                 </Button>
               </div>

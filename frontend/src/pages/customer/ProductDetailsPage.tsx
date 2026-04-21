@@ -1,28 +1,67 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MOCK_PRODUCTS } from "@/data/mockData";
+import { useEffect, useState } from "react";
+import { getProductById, ProductDTO } from "@/lib/productApi";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Store } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Store } from "lucide-react";
+import { toast } from "sonner";
+
+type Product = ProductDTO & { id: string };
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
-  const { addToCart, decreaseQty, getItemQty } = useCart();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  //Fetch product from backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
 
-  if (!product) {
+      try {
+        const response = await getProductById(Number(id));
+
+        setProduct({
+          ...response.data,
+          id: String(response.data.id),
+        });
+      } catch (error) {
+        console.error("Failed to load product", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // Loading state
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-        <Button onClick={() => navigate("/shop")}>Return to shop</Button>
+        <h2 className="text-xl font-medium">Loading product...</h2>
       </div>
     );
   }
 
-  const cartQty = getItemQty(product.id);
+  // If product not found
+  if (!product) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
+        <Button onClick={() => navigate("/")}>Return to Home</Button>
+      </div>
+    );
+  }
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    toast.success(`${product.name} added to cart!`);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -52,54 +91,44 @@ export default function ProductDetailsPage() {
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              {product.name}
+            </h1>
 
             <p className="text-3xl font-bold text-primary mb-6">
               ₹{product.price.toFixed(2)}
             </p>
 
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               {product.description}
             </p>
           </div>
 
-          {/* ✅ DYNAMIC CART UI */}
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+              <span className="font-medium">Availability</span>
+              {product.stock > 0 ? (
+                <span className="text-green-600 font-medium">
+                  {product.stock} in stock
+                </span>
+              ) : (
+                <span className="text-destructive font-medium">
+                  Out of stock
+                </span>
+              )}
+            </div>
+          </div>
+
           <div className="mt-auto">
-            {cartQty === 0 ? (
-              <Button
-                size="lg"
-                className="w-full h-14"
-                onClick={() => addToCart(product)}
-              >
-                Add to Cart
-              </Button>
-            ) : (
-              <div className="flex items-center gap-4">
-                {/* QUANTITY */}
-                <div className="flex items-center border rounded-full px-4 py-2 gap-4">
-                  <button
-                    onClick={() => decreaseQty(product.id)}
-                    className="text-xl"
-                  >
-                    -
-                  </button>
-
-                  <span className="text-lg">{cartQty}</span>
-
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="text-xl"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {/* GO TO CART */}
-                <Button onClick={() => navigate("/cart")}>
-                  Go to Cart
-                </Button>
-              </div>
-            )}
+            <Button
+              size="lg"
+              className="w-full text-lg h-14 gap-2"
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+            </Button>
           </div>
         </div>
       </div>

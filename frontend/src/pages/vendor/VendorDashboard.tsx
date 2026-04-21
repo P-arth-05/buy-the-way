@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import StatCard from "@/components/shared/StatCard";
-import { Package, CheckCircle2, Clock3, IndianRupee } from "lucide-react";
+import { Package, CheckCircle2, Clock3, IndianRupee, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ApiResponse<T> {
   message: string;
@@ -96,8 +97,23 @@ const VendorDashboard = () => {
       .slice(0, 6);
   }, [products]);
 
+  const lowStockProducts = useMemo(() => {
+    return products.filter((product) => (product.stock || 0) < 5);
+  }, [products]);
+
   return (
     <div className="space-y-8">
+      {lowStockProducts.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Low Stock Alert</AlertTitle>
+          <AlertDescription>
+            The following products have low stock (less than 5 units):{" "}
+            {lowStockProducts.map((product) => product.name).join(", ")}.
+            Please restock soon to avoid stockouts.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           label="Total Products"

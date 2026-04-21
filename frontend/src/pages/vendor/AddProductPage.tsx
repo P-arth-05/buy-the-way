@@ -31,6 +31,11 @@ const AddProductPage = () => {
       return;
     }
 
+    if (Number(price) < 0) {
+      toast.error("Price cannot be negative.");
+      return;
+    }
+
     try {
       await addProduct({
         name: name.trim(),
@@ -103,7 +108,7 @@ const AddProductPage = () => {
           <Label>Description</Label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} required placeholder="Describe your product..." className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm min-h-[100px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
         </div>
-        <Button type="submit">Submit Product</Button>
+        <Button type="submit">Submit Product for Approval</Button>
       </form>
 
       <form onSubmit={handleCategoryRequest} className="bg-card rounded-2xl shadow-soft p-6 mt-6 space-y-4">
