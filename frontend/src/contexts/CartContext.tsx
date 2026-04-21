@@ -1,14 +1,17 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { CartItem, Product, MOCK_PRODUCTS } from "@/data/mockData";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API = "http://localhost:8080/api/cart";
+
+// ✅ Always fetches a fresh token from Supabase session — no localStorage race condition
+const getAuthHeaders = async () => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 interface CartContextType {
   items: CartItem[];
@@ -29,35 +32,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [user, setUser] = useState<any>(null);
 
-  // ✅ GET USER FROM SUPABASE
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    };
+  // ✅ Use AuthContext as the single source of truth for the user
+  const { user, loading } = useAuth();
 
-    getUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  // ✅ FETCH CART FROM BACKEND (FIXED HERE)
+  // ✅ Fetch cart from backend
   const refreshCart = async () => {
     if (!user?.id) return;
 
     try {
+      const headers = await getAuthHeaders();
+
       const res = await axios.get(API, {
         params: { userId: user.id },
+        headers,
       });
 
       setItems(
@@ -82,14 +70,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ LOAD CART WHEN USER CHANGES
-  useEffect(() => {
-    if (user?.id) {
-      refreshCart();
-    }
-  }, [user]);
+  // ✅ Load cart whenever the authenticated user changes
+  // No duplicate Supabase listener — AuthContext handles all auth events
+// ✅ Load cart only after AuthContext has fully settled
 
-  // ✅ ADD TO CART
+useEffect(() => {
+    if (!loading && user?.id) {
+      refreshCart();
+    } else if (!loading && !user?.id) {
+      setItems([]);
+    }
+  }, [user?.id, loading]);
+
+  // ✅ Add to cart
   const addToCart = async (product: Product) => {
     if (!user?.id) {
       console.error("User not logged in");
@@ -97,6 +90,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      const headers = await getAuthHeaders();
+
       await axios.post(API, null, {
         params: {
           userId: user.id,
@@ -104,6 +99,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           productName: product.name,
           quantity: 1,
         },
+        headers,
       });
 
       await refreshCart();
@@ -112,16 +108,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ REMOVE ITEM
+  // ✅ Remove item
   const removeFromCart = async (productId: string) => {
     if (!user?.id) return;
 
     try {
+      const headers = await getAuthHeaders();
+
       await axios.delete(API, {
         params: {
           userId: user.id,
           productId,
         },
+        headers,
       });
 
       await refreshCart();
@@ -130,7 +129,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ UPDATE QUANTITY
+  // ✅ Update quantity
   const updateQuantity = async (productId: string, quantity: number) => {
     if (!user?.id) return;
 
@@ -140,12 +139,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      const headers = await getAuthHeaders();
+
       await axios.put(API, null, {
         params: {
           userId: user.id,
           productId,
           quantity,
         },
+        headers,
       });
 
       await refreshCart();
@@ -154,11 +156,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ DECREASE
+  // ✅ Decrease quantity by 1
   const decreaseQty = (productId: string) => {
     const item = items.find((i) => i.product.id === productId);
     if (!item) return;
-
     updateQuantity(productId, item.quantity - 1);
   };
 

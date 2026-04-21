@@ -67,14 +67,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 1. Check existing session on app load
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-
+      console.log("🟡 getSession fired, session:", session);
+      console.log("🟡 access_token:", session?.access_token);
       if (session?.user) {
+        
         const profile = await fetchProfile(session.user.id, session.access_token)
         setUser(profile)
         localStorage.setItem("access_token", session.access_token)
       }
 
       setLoading(false)
+      console.log("🟡 loading set to false");
     })
 
     // 2. Listen for auth events
