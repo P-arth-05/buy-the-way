@@ -2,7 +2,6 @@ package com.buytheway.modules.order.service;
 
 import java.util.List;
 import java.util.Objects;
-
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -108,7 +107,14 @@ public class OrderService {
         List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
 
         return orders.stream()
-                .map(order -> new OrderResponseDTO(order, getProduct(order.getProductId())))
+                .map(order -> {
+                    try {
+                        return new OrderResponseDTO(order, getProduct(order.getProductId()));
+                    } catch (BadRequestException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -122,7 +128,14 @@ public class OrderService {
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
         return orders.stream()
-                .map(order -> new OrderResponseDTO(order, getProduct(order.getProductId())))
+                .map(order -> {
+                    try {
+                        return new OrderResponseDTO(order, getProduct(order.getProductId()));
+                    } catch (BadRequestException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
