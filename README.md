@@ -297,7 +297,7 @@ Three automated emails are sent via Gmail SMTP:
    ```bash
    npm run dev
    ```
-   The app runs on `http://localhost:5173`
+   The app runs on `http://localhost:8081`
 
 ---
 
